@@ -1,1 +1,8 @@
 ¡Hola! Este es un archivo de prueba en el proyecto Sistema de Pedidos.
+
+Este archivo ha sido modificado en la rama roberth.
+Ahora contiene más información y será fusionado con la rama main.
+
+Fecha de modificación: 10 de octubre de 2025
+Autor: Alejandro
+Propósito: Demostrar el uso de ramas y fusiones en Git.
