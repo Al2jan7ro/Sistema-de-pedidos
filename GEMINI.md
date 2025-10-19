@@ -1,0 +1,101 @@
+# GAVIOTY SYSTEM RULES (WINDSURFRULES)
+
+---
+
+## 1. ARQUITECTURA CORE Y STACK
+
+**Framework Principal:** Next.js 14+ (App Router)  
+Rendimiento, Server Components y Routing Avanzado.
+
+**Base de Datos:** Supabase (PostgreSQL)  
+Backend como Servicio, Auth, y RLS.
+
+**Lenguaje:** TypeScript (Strict Mode)  
+Seguridad en tiempo de desarrollo. Tipado obligatorio.
+
+**Estilo:** Tailwind CSS  
+Desarrollo rápido y responsivo.
+
+**UI Kit:** Shadcn/ui Conventions  
+Diseño limpio, moderno y accesible.
+
+---
+
+## 2. BACKEND Y SEGURIDAD (SUPABASE & NEXT.JS)
+
+### 2.1. Tipado de Supabase
+
+- **Fuente Única de Verdad:**  
+  El archivo `src/lib/database.types.ts` debe generarse con la CLI y ser la única fuente de tipado (`Database`) para todos los clientes de Supabase.
+
+- **Clientes Tipados:**  
+  Los clientes de Supabase deben importarse siempre desde `@/utils/supabase/*` para garantizar el tipado estricto.
+
+### 2.2. Clientes de Supabase
+
+- `utils/supabase/server.ts`: Server Components → Lectura de datos.  
+- `utils/supabase/client.ts`: Client Components → Mutaciones (INSERT, UPDATE, DELETE).  
+- `utils/supabase/middleware.ts`: Middleware (Root) → Lógica de gestión de cookies de sesión.
+
+### 2.3. Control de Acceso y RLS
+
+- **Middleware (Raíz):**  
+  El archivo `middleware.ts` en la raíz del proyecto es el único responsable de verificar la sesión y redirigir a `/login` si es necesario (Protección de `/dashboard/*`).
+
+- **Método Único de Login:**  
+  Solo se permite **Google OAuth** para el login. Todas las interfaces de email/contraseña están eliminadas del frontend.
+
+- **Autorización por Rol:**  
+  La navegación, el contenido del Dashboard y el acceso a datos sensibles (módulos de Ventas) se controlan mediante el campo `role` del perfil, validado por la función RLS `public.get_user_role()` en la DB y el archivo `dashboard/layout.tsx` en el frontend.
+
+---
+
+## 3. CONVENCIONES DE FRONTEND (TAILWIND/SHADCN)
+
+### 3.1. Estructura y Rutas
+
+- **Rutas Protegidas:**  
+  Todo el contenido de la aplicación debe estar bajo la ruta `/dashboard`.
+
+- **Rutas de Autenticación:**  
+  Las rutas de servidor para Auth deben estar en `src/app/auth/*` (`callback`, `signout`).
+
+- **Layout:**  
+  El archivo `src/app/dashboard/layout.tsx` es un **Server Component obligatorio** para obtener el `role` del usuario y renderizar la navegación condicional (sidebar).
+
+### 3.2. Estilo
+
+- **Componentes Funcionales:**  
+  Usar exclusivamente componentes funcionales y Hooks.
+
+    - # General Code Style & Formatting
+    - Follow the Airbnb Style Guide for code formatting.
+    - Use PascalCase for React component file names (e.g., UserCard.tsx, not user-card.tsx).
+    - Prefer named exports for components.
+
+    # Project Structure & Architecture
+    - Follow Next.js patterns and use the App Router.
+    - Correctly determine when to use server vs. client components in Next.js.
+
+    # Styling & UI
+    - Use Tailwind CSS for styling.
+    - Use Shadcn UI for components.
+
+    # State Management & Logic
+    - Use React Context for state management.
+
+- **Responsividad:**  
+  Todos los layouts deben ser diseñados primero para **móvil** y luego ajustados para **desktop** usando prefijos de Tailwind (`sm:`, `lg:`).
+
+---
+
+
+### 3.3. Validación de Formularios
+
+- **Zod:**  
+  Usar Zod para validación de formularios en el frontend.
+
+- **Tipado:**  
+  Usar tipos de TypeScript para tipar los formularios.
+
+---
