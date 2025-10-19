@@ -1,37 +1,51 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { Database } from '@/lib/database.types'; // Importamos nuestros tipos
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import type { Database } from '@/lib/database.types'
 
-// Usamos el ID y la clave pública (ANON_KEY) desde .env.local
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-/**
- * Crea un cliente de Supabase para Componentes de Servidor y Server Actions.
- * Lee las cookies para manejar la sesión del usuario autenticado.
- */
-export async function createClient() {
-  const cookieStore = await cookies();
-  
-  return createServerClient<Database>( // Tipamos el cliente con 'Database'
-    supabaseUrl!,
-    supabaseKey!,
+export const createClient = async () => {
+
+  const cookieStore = await cookies()
+
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+
     {
       cookies: {
-        getAll() {
-          return cookieStore.getAll();
+
+        get(name: string) {
+          return cookieStore.get(name)?.value
+
         },
-        setAll(cookiesToSet) {
+
+        set(name: string, value: string, options: CookieOptions) {
+
           try {
-            // Este método solo se llama en Server Actions.
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Se ignora si se llama desde un Server Component (no puede cambiar cookies)
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+
+            // Manejo de error silencioso para Server Components
+
           }
+
         },
+
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options })
+
+          } catch (error) {
+
+            // Manejo de error silencioso para Server Components
+          }
+
+        },
+
       },
+
     }
-  );
+
+  )
+
 }

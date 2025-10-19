@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createClient } from "@/utils/supabase/client"
 import { useState } from "react"
-// No es necesario importar FaGoogle porque estás usando un SVG inline.
 
 export function LoginForm() {
     const [loading, setLoading] = useState(false);

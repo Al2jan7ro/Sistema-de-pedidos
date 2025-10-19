@@ -124,7 +124,7 @@ export function AppSidebar({
             {/* Sidebar */}
             <div
                 className={cn(
-                    "fixed left-0 top-0 z-40 h-screen border-r border-border bg-background transition-all duration-300",
+                    "fixed lg:sticky left-0 top-0 z-40 h-screen border-r border-border bg-background transition-all duration-300",
                     isCollapsed ? "w-16" : "w-64",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
                     className,
@@ -133,7 +133,7 @@ export function AppSidebar({
                 <div className="flex h-full flex-col">
                     {/* Header */}
                     <div className="flex h-16 items-center justify-between border-b border-border px-4">
-                        {!isCollapsed && <h2 className="text-lg font-semibold tracking-tight">Mi Negocio</h2>}
+                        {!isCollapsed && <img src="/assets/gaviotylogo.png" alt="Logo" width="120" height="120" />}
 
                     </div>
 

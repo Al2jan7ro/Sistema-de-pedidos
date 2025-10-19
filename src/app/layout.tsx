@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from 'sonner';
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Gavioty Orders System",
   description: "Sistema interno de pedidas y ventas, de la empresa Gavioty Pro Solutions",
+  icons: {
+    icon: '/assets/gaviotylogo.png',
+  },
 };
 
 export default function RootLayout({
@@ -27,6 +32,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            duration: 5000,
+          }}
+        />
         {children}
       </body>
     </html>

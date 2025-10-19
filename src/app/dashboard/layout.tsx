@@ -32,21 +32,19 @@ export default async function LayoutNavigation(
     const userEmail = profile?.email || user.email || 'N/A';
 
     return (
-        <div className="">
-            <div className="">
-                {/* 3. PASAR PROPS DE AUTORIZACIÓN Y PERFIL AL SIDEBAR */}
-                <AppSidebar
-                    userRole={userRole}
-                    userName={userName}
-                    userEmail={userEmail}
-                    // La inicial del usuario para el avatar
-                    userInitial={userName ? userName[0].toUpperCase() : 'GS'}
-                />
-            </div>
+        <div className="flex min-h-screen">
+            {/* 3. PASAR PROPS DE AUTORIZACIÓN Y PERFIL AL SIDEBAR */}
+            <AppSidebar
+                userRole={userRole}
+                userName={userName}
+                userEmail={userEmail}
+                // La inicial del usuario para el avatar
+                userInitial={userName ? userName[0].toUpperCase() : 'GS'}
+            />
             {/* Ajustar el padding/margin para compensar el sidebar fijo */}
-            <div className="">
+            <main className="flex-1 p-6 overflow-auto">
                 {children}
-            </div>
+            </main>
         </div>
     )
 }
