@@ -99,50 +99,43 @@ export async function uploadOrderAttachments(
     const supabase = await createClient();
 
     const uploadedAttachments: { order_id: string, type: string, storage_path: string }[] = [];
-    let fileUploadSuccessCount = 0;
+    const errors: string[] = [];
 
     for (const file of attachments) {
-        // Validaciones de tipo y tamaño
         if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-            return { success: false, message: `Tipo de archivo no permitido: ${file.name}.` };
+            errors.push(`Tipo de archivo no permitido: ${file.name}`);
+            continue;
         }
         if (file.size > MAX_FILE_SIZE) {
-            return { success: false, message: `Archivo muy grande: ${file.name}. Límite ${MAX_FILE_SIZE / 1024 / 1024}MB.` };
+            errors.push(`Archivo muy grande: ${file.name} (Límite: ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
+            continue;
         }
 
-        const fileExtension = file.name.split('.').pop();
+        const fileExtension = file.name.split('.').pop() || 'tmp';
         const uniqueFileName = `${orderId}/${crypto.randomUUID()}.${fileExtension}`;
 
-        // 1. Subir a Storage (asume bucket 'order-files' con RLS configurada)
         const { data: storageData, error: uploadError } = await supabase.storage
             .from('order-files')
             .upload(uniqueFileName, file, { upsert: false });
 
         if (uploadError) {
             console.error('Storage Upload Error:', uploadError);
-            return { success: false, message: `Error al subir el archivo ${file.name}.` };
+            errors.push(`Error al subir: ${file.name}`);
+            continue;
         }
-        fileUploadSuccessCount++;
 
-        // 2. Determinar el tipo de archivo para la DB
         let fileType: string = 'Otro';
-        if (file.type.startsWith('image/')) {
-            fileType = 'Imagen';
-        } else if (file.type === 'application/pdf') {
-            fileType = 'PDF';
-        } else if (file.type.includes('cad') || file.type.includes('dxf') || file.type.includes('dwg')) {
-            fileType = 'CAD';
-        }
+        if (file.type.startsWith('image/')) fileType = 'Imagen';
+        else if (file.type === 'application/pdf') fileType = 'PDF';
+        else if (file.type.includes('cad') || file.type.includes('dxf') || file.type.includes('dwg')) fileType = 'CAD';
 
-        // 3. Preparar el registro
         uploadedAttachments.push({
             order_id: orderId,
             type: fileType,
-            storage_path: storageData!.path,
+            storage_path: storageData.path,
         });
     }
 
-    // 4. Registrar referencias en DB (order_attachments)
     if (uploadedAttachments.length > 0) {
         const { error: dbError } = await supabase
             .from('order_attachments')
@@ -150,13 +143,18 @@ export async function uploadOrderAttachments(
 
         if (dbError) {
             console.error('Attachment DB Insert Error:', dbError);
-            // La RLS de order_attachments se encarga de la autorización aquí.
-            return { success: false, message: 'Se subieron archivos, pero falló el registro en la base de datos.' };
+            return { success: false, message: 'Archivos subidos pero no se pudieron registrar en la DB.' };
         }
     }
 
+    if (errors.length > 0) {
+        const successCount = uploadedAttachments.length;
+        const errorMessage = `Se subieron ${successCount} de ${attachments.length} archivos. Errores: ${errors.join(', ')}`;
+        return { success: successCount > 0, message: errorMessage };
+    }
+
     revalidatePath(`/dashboard/orders/${orderId}`);
-    return { success: true, message: `Se subieron ${fileUploadSuccessCount} adjuntos con éxito.` };
+    return { success: true, message: `Se subieron ${uploadedAttachments.length} adjuntos con éxito.` };
 }
 
 // ----------------------------------------------------------------------

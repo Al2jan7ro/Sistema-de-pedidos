@@ -9,9 +9,10 @@ import { Search, Plus, Edit, DollarSign } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
 import { OrderExtended } from "@/lib/schemas/orders"
-// Importamos el nuevo componente
 import { DeleteOrderButton } from './DeleteOrderButton';
 import { Badge } from "@/components/ui/badge"
+// IMPORTAR EL NUEVO COMPONENTE
+import { AttachmentsViewer } from './AttachmentsViewer';
 
 // Tipificación de las props
 interface OrderTableProps {
@@ -21,7 +22,7 @@ interface OrderTableProps {
 export function OrderTable({ initialOrders }: OrderTableProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 6
+    const itemsPerPage = 4
 
     // --- Lógica de Filtrado y Paginación ---
     const filteredOrders = useMemo(() => {
@@ -134,6 +135,7 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                                 <TableHead className="font-semibold">SOLICITANTE</TableHead>
                                 <TableHead className="font-semibold w-[120px]">ESTADO</TableHead>
                                 <TableHead className="font-semibold">FECHA</TableHead>
+                                <TableHead className="font-semibold text-center w-[50px]">ARCHIVOS</TableHead> {/* NUEVA COLUMNA */}
                                 <TableHead className="text-right font-semibold">ACCIONES</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -151,6 +153,14 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                                         <TableCell className="text-muted-foreground">
                                             {format(new Date(order.created_at || new Date()), 'dd/MMM/yyyy')}
                                         </TableCell>
+                                        {/* CELDA DE ARCHIVOS */}
+                                        <TableCell className="text-center">
+                                            <AttachmentsViewer
+                                                attachments={order.order_attachments}
+                                                orderNumber={order.order_number}
+                                            />
+                                        </TableCell>
+                                        {/* FIN CELDA DE ARCHIVOS */}
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 {/* 1. Botón para Crear Venta */}
@@ -186,7 +196,7 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                                         {initialOrders.length === 0 && searchQuery === ""
                                             ? "No hay pedidos registrados en el sistema."
                                             : `No se encontraron pedidos para la búsqueda: "${searchQuery}"`
@@ -245,7 +255,6 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                 )}
             </CardContent>
 
-            {/* El modal de eliminación se ha movido al componente DeleteOrderButton */}
         </Card>
     )
 }

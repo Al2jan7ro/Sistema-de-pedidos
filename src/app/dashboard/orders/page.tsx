@@ -23,7 +23,8 @@ async function fetchOrders(): Promise<OrderExtended[]> {
             created_at,
             clients(name),
             products(name),
-            solicitant:profiles!orders_solicitant_id_fkey(first_name, last_name)
+            solicitant:profiles!orders_solicitant_id_fkey(first_name, last_name),
+            order_attachments(id, type, storage_path, created_at)
         `)
         .order('created_at', { ascending: false });
 
@@ -37,6 +38,9 @@ async function fetchOrders(): Promise<OrderExtended[]> {
 }
 
 export default async function OrdersPage() {
+    // Para forzar la revalidación de datos si es necesario
+    // export const dynamic = 'force-dynamic'; 
+
     const initialOrders = await fetchOrders();
 
     return (

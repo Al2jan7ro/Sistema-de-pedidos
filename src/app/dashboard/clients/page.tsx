@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { ClientTable } from '@/components/clients/client-table';
 import { Client, ClientStatusEnum } from '@/lib/schemas/client';
-import { notFound } from 'next/navigation';
 
 
 // Componente de página principal (Server Component)

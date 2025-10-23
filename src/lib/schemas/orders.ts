@@ -81,6 +81,14 @@ export type DropdownOption = {
     name: string;
 }
 
+// NUEVA EXPORTACIÓN: Tipo para los adjuntos de pedidos
+export interface Attachment {
+    id: string;
+    type: string; // O el tipo específico si tienes un ENUM para adjuntos
+    storage_path: string;
+    created_at: string;
+}
+
 // Definimos los tipos base usando la utilidad Tables de database.types.ts
 type OrderRow = Tables<'orders'>;
 type ClientRow = Tables<'clients'>;
@@ -88,14 +96,18 @@ type ProductRow = Tables<'products'>;
 type ProfileNameRow = Pick<Tables<'profiles'>, 'first_name' | 'last_name'>;
 
 /**
- * Define la estructura de datos para la vista de Pedidos y formularios de edición.
+ * Define la estructura de datos para la vista de Pedidos y formularios de edición,
+ * incluyendo las relaciones (JOINS) y los adjuntos.
  */
 export interface OrderExtended extends Omit<OrderRow, 'client_id' | 'product_id' | 'solicitant_id'> {
     // Sobreescribimos 'status' para forzar el uso del Enum Zod
     status: z.infer<typeof OrderStatusEnum>;
 
-    // Relaciones: incluimos 'id' y 'name'
+    // Relaciones de la consulta
     clients: Pick<ClientRow, 'id' | 'name'>;
     products: Pick<ProductRow, 'id' | 'name'>;
     solicitant: ProfileNameRow;
+
+    // NUEVA PROPIEDAD: Array de adjuntos (viene del JOIN de Supabase)
+    order_attachments: Attachment[];
 }
