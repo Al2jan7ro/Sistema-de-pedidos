@@ -11,7 +11,7 @@ import { Tables } from '@/lib/database.types'; // Tipos generados por Supabase
 export type ActionResponse = {
     success: boolean;
     message: string;
-    fieldErrors?: Record<string, string>;
+    fieldErrors?: Record<string, string[] | undefined>;
     data?: { orderId?: string }; // Para devolver el ID al crear
 };
 

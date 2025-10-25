@@ -11,9 +11,9 @@ import { format } from 'date-fns';
 import { Product } from '@/lib/schemas/product';
 import { DeleteProductButton } from './DeleteProductButton';
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
 } from '@/components/ui/hover-card';
 
 interface ProductListTableProps {
@@ -102,8 +102,8 @@ export function ProductListTable({ products, canMutate, canCreate }: ProductList
                                                 <HoverCard>
                                                     <HoverCardTrigger asChild>
                                                         <span className="cursor-default hover:underline">
-                                                            {product.description.length > 50 
-                                                                ? `${product.description.substring(0, 50)}...` 
+                                                            {product.description.length > 50
+                                                                ? `${product.description.substring(0, 50)}...`
                                                                 : product.description}
                                                         </span>
                                                     </HoverCardTrigger>

@@ -83,9 +83,8 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
         <Card className="w-full border-border shadow-lg min-h-[40vw]">
             <CardHeader className="space-y-3 pb-6">
                 <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
-                        <DollarSign className="h-5 w-5" />
-                    </div>
+                    <img src="/assets/gaviotylogo.png" alt="Logo" width="120" height="120" />
+
                     <div>
                         <CardTitle className="text-2xl font-bold tracking-tight">Pedidos de Obra</CardTitle>
                         <CardDescription className="text-sm text-muted-foreground">
@@ -129,14 +128,14 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                <TableHead className="font-semibold w-[120px]"># PEDIDO</TableHead>
-                                <TableHead className="font-semibold">CLIENTE</TableHead>
-                                <TableHead className="font-semibold">PRODUCTO</TableHead>
-                                <TableHead className="font-semibold">SOLICITANTE</TableHead>
-                                <TableHead className="font-semibold w-[120px]">ESTADO</TableHead>
-                                <TableHead className="font-semibold">FECHA</TableHead>
-                                <TableHead className="font-semibold text-center w-[50px]">ARCHIVOS</TableHead> {/* NUEVA COLUMNA */}
-                                <TableHead className="text-right font-semibold">ACCIONES</TableHead>
+                                <TableHead className="font-semibold w-[120px]">Pedido</TableHead>
+                                <TableHead className="font-semibold">Cliente</TableHead>
+                                <TableHead className="font-semibold">Producto</TableHead>
+                                <TableHead className="font-semibold">Solicitante</TableHead>
+                                <TableHead className="font-semibold w-[120px]">Estado</TableHead>
+                                <TableHead className="font-semibold">Fecha</TableHead>
+                                <TableHead className="font-semibold text-center w-[50px]">Archivos</TableHead> {/* NUEVA COLUMNA */}
+                                <TableHead className="text-right font-semibold">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -153,16 +152,16 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                                         <TableCell className="text-muted-foreground">
                                             {format(new Date(order.created_at || new Date()), 'dd/MMM/yyyy')}
                                         </TableCell>
-                                        {/* CELDA DE ARCHIVOS */}
                                         <TableCell className="text-center">
+                                            {/* CELDA DE ARCHIVOS */}
                                             <AttachmentsViewer
                                                 attachments={order.order_attachments}
                                                 orderNumber={order.order_number}
                                             />
                                         </TableCell>
-                                        {/* FIN CELDA DE ARCHIVOS */}
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
+                                                {/* FIN CELDA DE ARCHIVOS */}
                                                 {/* 1. Botón para Crear Venta */}
                                                 <Link href={`/dashboard/sales/new?orderId=${order.id}`} title="Crear Venta a partir de este Pedido">
                                                     <Button
