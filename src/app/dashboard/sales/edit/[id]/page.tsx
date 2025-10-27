@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { EditSaleForm } from '@/components/sales/EditSaleForm'; // Formulario de edición (cliente)
+import { EditSaleForm } from '@/components/sales/EditSaleForm';
+import { SaleForEditPageProps } from '@/lib/schemas/sales'; // Import the new type
 
 // Función para obtener la venta, su pedido asociado Y las alturas disponibles
-async function fetchSaleForEdit(saleId: string) {
+async function fetchSaleForEdit(saleId: string): Promise<SaleForEditPageProps | null> {
     const supabase = await createClient();
     // ... (Verificar rol de Admin - igual que en NewSalePage) ...
     const { data: { user } } = await supabase.auth.getUser();
@@ -41,19 +42,26 @@ async function fetchSaleForEdit(saleId: string) {
         return null; // Not found
     }
 
+    // Initialize the result object with sale data and default values for new properties
+    let result: SaleForEditPageProps = {
+        ...(sale as SaleForEditPageProps), // Use type assertion here
+        availableHeights: [], // Initialize as empty array
+        error: null, // Initialize as null
+    };
+
     // No permitir editar ventas canceladas
     if (sale.status === 'Cancelled') {
-        return { ...sale, error: 'Esta venta ha sido cancelada y no puede editarse.' };
+        result.error = 'Esta venta ha sido cancelada y no puede editarse.';
+        return result;
     }
 
     // Si no hay pedido asociado (error de datos) o tabla de unidades
     if (!sale.orders?.products?.unit_table_name) {
-        return { ...sale, error: 'El pedido asociado o su producto no están configurados correctamente.' };
+        result.error = 'El pedido asociado o su producto no están configurados correctamente.';
+        return result;
     }
 
     const unitTableName = sale.orders.products.unit_table_name;
-    let availableHeights: number[] = [];
-
     // 2. Obtener alturas disponibles (igual que en NewSalePage)
     const allowedTables = ['tabla_gavioflex_units', 'tabla_gavioterranet_units'];
     if (allowedTables.includes(unitTableName)) {
@@ -62,14 +70,14 @@ async function fetchSaleForEdit(saleId: string) {
                 .from(unitTableName as 'tabla_gavioflex_units' | 'tabla_gavioterranet_units')
                 .select('altura')
                 .order('altura', { ascending: true });
-            if (!heightsError && heightsData) {
-                availableHeights = heightsData.map(h => h.altura);
+            if (!heightsError && heightsData) { // Populate availableHeights in the result object
+                result.availableHeights = heightsData.map(h => h.altura);
             }
         } catch (e) { console.error("Error fetching heights for edit:", e); }
     }
 
-    // Devolver la venta combinada con las alturas
-    return { ...sale, availableHeights, error: null };
+    // Devolver la venta combinada con las alturas y el error (que será null si todo fue bien)
+    return result;
 }
 
 
@@ -104,12 +112,7 @@ export default async function EditSalePage({ params }: { params: { id: string } 
 
     return (
         <div className="flex-1 space-y-8 p-8 pt-6">
-            <Button asChild variant="outline" size="sm" className="mb-4">
-                <Link href="/dashboard/sales">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Volver a Ventas
-                </Link>
-            </Button>
+
             <h2 className="text-3xl font-bold tracking-tight">
                 Editar Venta #{saleData.sale_code} (Pedido #{saleData.orders.order_number})
             </h2>
