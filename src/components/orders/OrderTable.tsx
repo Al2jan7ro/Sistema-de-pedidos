@@ -128,14 +128,7 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                <TableHead className="font-semibold w-[120px]">Pedido</TableHead>
-                                <TableHead className="font-semibold">Cliente</TableHead>
-                                <TableHead className="font-semibold">Producto</TableHead>
-                                <TableHead className="font-semibold">Solicitante</TableHead>
-                                <TableHead className="font-semibold w-[120px]">Estado</TableHead>
-                                <TableHead className="font-semibold">Fecha</TableHead>
-                                <TableHead className="font-semibold text-center w-[50px]">Archivos</TableHead> {/* NUEVA COLUMNA */}
-                                <TableHead className="text-right font-semibold">Acciones</TableHead>
+                                <TableHead className="font-semibold w-[120px]">Pedido</TableHead><TableHead className="font-semibold">Cliente</TableHead><TableHead className="font-semibold">Producto</TableHead><TableHead className="font-semibold">Solicitante</TableHead><TableHead className="font-semibold w-[120px]">Estado</TableHead><TableHead className="font-semibold">Fecha</TableHead><TableHead className="font-semibold text-center w-[50px]">Archivos</TableHead><TableHead className="text-right font-semibold">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

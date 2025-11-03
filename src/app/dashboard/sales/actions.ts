@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
+
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { ActionResponse } from '@/lib/schemas/orders';
@@ -98,11 +99,19 @@ export async function calculateSaleItems(
                 let totalValue = unitValue * length;
 
                 // --- CUSTOM DIVISION LOGIC (Based on your previous actions.ts) ---
+                // Lógica para tabla_gavioterranet_units
                 if (
                     key === 'canasta de 2x1x1' ||
                     key === 'canasta de 1,5x1x1' ||
                     key === 'canasta de 2x1x0,5' ||
                     key === 'geotextil planar' // Check exact name
+                ) {
+                    totalValue /= 2;
+                    // Lógica para tabla_gavioflex_units
+                } else if (
+                    key === 'seccion_cuna' ||
+                    key === 'seccion_zapata' ||
+                    key === 'seccion_contrafuerte'
                 ) {
                     totalValue /= 2;
                 } else if (key === 'tuberia') {
@@ -318,58 +327,83 @@ export async function cancelSale(
 
 // --- ACTION 5: Get Order Totals (Summation) ---
 export async function getOrderTotals(orderId: string) {
-    const supabase = await createClient(); // Use service role for consistent reads if needed
+    const supabase = await createClient();
 
-    // Ensure orderId is valid
-    if (!orderId || typeof orderId !== 'string' || orderId.length < 5) { // Basic check
+    if (!orderId) {
         console.error("getOrderTotals: Invalid orderId provided.");
         return { materials: [], totalLength: 0, error: "ID de pedido inválido." };
     }
 
-
-    // 1. Find all ACTIVE sales associated with the order
-    const { data: activeSales, error: salesFetchError } = await supabase
+    // 1. Contar las ventas activas para decidir la lógica a aplicar
+    const { data: activeSales, error: salesError } = await supabase
         .from('sales')
-        .select('id, length') // Select ID and length
-        .eq('order_id', orderId) // Filter by order
-        .in('status', ['pending', 'completed']); // Sum sales that are not deleted
+        .select('id, length', { count: 'exact' })
+        .eq('order_id', orderId)
+        .in('status', ['pending', 'completed']);
 
-    if (salesFetchError) {
-        console.error("Error fetching active sales for totals:", salesFetchError);
-        return { materials: [], totalLength: 0, error: "Error al buscar ventas." };
+    if (salesError) {
+        console.error("Error fetching sales for totals:", salesError);
+        return { materials: [], totalLength: 0, error: "Error al obtener las ventas del pedido." };
     }
 
-    if (!activeSales || activeSales.length === 0) {
-        // No active sales for this order
-        return { materials: [], totalLength: 0 };
+    const salesCount = activeSales?.length ?? 0;
+
+    // LÓGICA CONDICIONAL
+    // A. Si hay MÁS de una venta, sumar los totales.
+    if (salesCount > 1) {
+        const [materialsResult, totalLengthResult] = await Promise.all([
+            supabase.rpc('get_order_totals_by_id', { p_order_id: orderId }),
+            supabase.rpc('get_order_total_length', { p_order_id: orderId })
+        ]);
+
+        if (materialsResult.error || totalLengthResult.error) {
+            console.error("Error calling RPC functions for totals:", materialsResult.error || totalLengthResult.error);
+            return { materials: [], totalLength: 0, error: "Error al calcular los totales del pedido." };
+        }
+
+        const materials = (materialsResult.data || []).map(mat => ({
+            ...mat,
+            label: ITEM_KEY_TO_LABEL[mat.item_key] || mat.item_key
+        }));
+        const totalLength = totalLengthResult.data || 0;
+
+        return {
+            materials: materials.filter(m => m.total_value > 0) as {
+                item_key: string;
+                item_unit: string;
+                total_value: number;
+                label: string
+            }[],
+            totalLength: parseFloat(totalLength.toFixed(3)),
+            error: null
+        };
     }
+    // B. Si hay EXACTAMENTE una venta, devolver sus datos directamente.
+    else if (salesCount === 1) {
+        const singleSale = activeSales[0];
+        const { data: saleItems, error: itemsError } = await supabase
+            .from('sale_items')
+            .select('item_key, item_unit, item_value')
+            .eq('sale_id', singleSale.id);
 
-    const activeSaleIds = activeSales.map(sale => sale.id);
-    const totalLength = activeSales.reduce((sum, sale) => sum + (sale.length || 0), 0);
+        if (itemsError) {
+            console.error("Error fetching items for single sale:", itemsError);
+            return { materials: [], totalLength: 0, error: "Error al obtener los materiales de la venta." };
+        }
 
-    // 2. Sum all 'sale_items' associated with these ACTIVE sales
-    const { data: materials, error: itemsError } = await supabase
-        .from('sale_items')
-        .select('item_key, item_unit, total_value:item_value.sum()') // item_key and item_unit implicitly group
-        .in('sale_id', activeSaleIds); // Filter by active sale IDs
+        const materials = (saleItems || []).map(item => ({
+            item_key: item.item_key,
+            item_unit: item.item_unit,
+            total_value: item.item_value, // El nombre del campo es `total_value` en el tipo de retorno esperado
+            label: ITEM_KEY_TO_LABEL[item.item_key] || item.item_key
+        }));
 
-    if (itemsError) {
-        console.error("Error summing sale items:", itemsError);
-        return { materials: [], totalLength: totalLength, error: "Error al sumar materiales." };
+        return { materials, totalLength: singleSale.length || 0, error: null };
     }
-
-    // Add labels to the summed materials
-    const labeledMaterials = (materials || []).map(mat => ({
-        ...mat,
-        label: ITEM_KEY_TO_LABEL[mat.item_key] || mat.item_key // Add label
-    }));
-
-
-    return {
-        materials: labeledMaterials as { item_key: string; item_unit: string; total_value: number; label: string }[],
-        totalLength: parseFloat(totalLength.toFixed(3)), // Round total length
-        error: null // Indicate success
-    };
+    // C. Si no hay ventas, devolver vacío.
+    else {
+        return { materials: [], totalLength: 0, error: null };
+    }
 }
 
 
@@ -385,7 +419,7 @@ export async function getPendingOrders() {
 
     const { data, error } = await supabase
         .from('orders')
-        .select('id, order_number, products(name)')
+        .select('id, order_number, clients(id, name), products(id, name)')
         .eq('status', 'Pendiente')
         .order('created_at', { ascending: false });
 

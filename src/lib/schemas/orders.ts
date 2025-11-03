@@ -111,3 +111,16 @@ export interface OrderExtended extends Omit<OrderRow, 'client_id' | 'product_id'
     // NUEVA PROPIEDAD: Array de adjuntos (viene del JOIN de Supabase)
     order_attachments: Attachment[];
 }
+
+export interface OrderBasic {
+    id: string;
+    order_number: string;
+    products: {
+        id: string;
+        name: string;
+    } | null;
+    clients?: {
+        id: string;
+        name: string;
+    } | null;
+}

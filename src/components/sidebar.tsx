@@ -8,6 +8,7 @@ import {
     TrendingUp,
     Package,
     Users,
+    FunnelPlus,
     UserCircle,
     LogOut,
     ChevronRight,
@@ -66,15 +67,22 @@ const allMenuItems = [
         href: "/dashboard/users",
         adminOnly: true, // Solo Admin
     },
+
+    {
+        title: "Materiales (Proximamente)",
+        icon: FunnelPlus,
+        href: "/dashboard/materials",
+        adminOnly: true, // Solo Admin
+    }
 ]
 
 const accountItems = [
-    {
-        title: "Mi cuenta",
-        icon: UserCircle,
-        href: "/dashboard/account",
-        variant: "default" as const,
-    },
+    /* {
+         title: "Mi cuenta",
+         icon: UserCircle,
+         href: "/dashboard/account",
+         variant: "default" as const,
+     },*/
     // El item de Cerrar Sesión debe ser un formulario (POST) para seguridad
     {
         title: "Cerrar sesión",

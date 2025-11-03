@@ -115,81 +115,75 @@ export default function NewSalePage() {
     const shouldShowForm = useMemo(() => selectedOrderId && orderDetails && !loading && !error, [selectedOrderId, orderDetails, loading, error]);
 
     return (
-        <div className="flex-1 space-y-8 p-4 md:p-8 pt-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold tracking-tight">Registrar Venta (Tramo)</h2>
-                <Button asChild variant="outline" size="sm">
-                    <Link href="/dashboard/orders">
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Volver a Pedidos
-                    </Link>
-                </Button>
+        <div className="flex-1 flex flex-col items-center p-4 md:p-6 lg:p-8">
+            <div className="w-full max-w-4xl space-y-6">
+
+                {/* Selector de Pedido (si no viene ID en URL) */}
+                {!orderIdFromUrl && (
+                    <Card className="border-dashed border-primary/50">
+                        <CardHeader>
+                            <CardTitle className="text-lg">Paso 1: Seleccionar Pedido Pendiente</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Label htmlFor="orderSelect">Pedido a Finalizar</Label>
+                            <Select
+                                value={selectedOrderId || ''}
+                                onValueChange={(value) => setSelectedOrderId(value || null)} // Actualizar el ID seleccionado
+                                disabled={loading}
+                            >
+                                <SelectTrigger id="orderSelect">
+                                    <SelectValue placeholder={loading ? "Cargando pedidos..." : "Seleccione un pedido..."} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {pendingOrders.length > 0 ? (
+                                        pendingOrders.map(order => (
+                                            <SelectItem key={order.id} value={order.id}>
+                                                #{order.order_number} ({order.products?.name || 'Producto desc.'})
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <div className="p-2 text-center text-sm text-muted-foreground">
+                                            {loading ? 'Cargando...' : 'No hay pedidos pendientes.'}
+                                        </div>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                            {/* Mostrar error si la carga de pedidos falló */}
+                            {!loading && pendingOrders.length === 0 && !orderIdFromUrl && (
+                                <p className="text-xs text-red-600 mt-1">{error || 'No se encontraron pedidos pendientes.'}</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Mostrar Carga o Errores de Detalles */}
+                {selectedOrderId && loading && (
+                    <div className="flex justify-center items-center py-10"> <Loader2 className="h-8 w-8 animate-spin text-primary" /> </div>
+                )}
+                {selectedOrderId && error && !loading && (
+                    <div className="p-4 bg-destructive/10 text-destructive rounded-md">{error}</div>
+                )}
+
+                {/* Formulario de Venta (si hay un pedido válido seleccionado) */}
+                {shouldShowForm && orderDetails && (
+                    <Card className="w-full border-border shadow-md">
+                        <CardHeader className="bg-muted/30">
+                            <CardTitle className="text-lg">Registrar Tramo para Pedido #{orderDetails.order_number}</CardTitle>
+                            <CardDescription>
+                                Cliente: <span className="font-medium text-foreground">{orderDetails.clients?.name ?? 'N/A'}</span> |
+                                Producto: <span className="font-medium text-foreground">{orderDetails.products?.name ?? 'N/A'}</span>
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                            <CreateSaleForm
+                                orderId={selectedOrderId!} // Sabemos que no es nulo aquí
+                                productUnitTable={orderDetails.products?.unit_table_name || ''}
+                                availableHeights={orderDetails.availableHeights || []}
+                            />
+                        </CardContent>
+                    </Card>
+                )}
             </div>
-
-            {/* Selector de Pedido (si no viene ID en URL) */}
-            {!orderIdFromUrl && (
-                <Card className="mb-6 border-dashed border-primary/50">
-                    <CardHeader>
-                        <CardTitle className="text-lg">Paso 1: Seleccionar Pedido Pendiente</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Label htmlFor="orderSelect">Pedido a Finalizar</Label>
-                        <Select
-                            value={selectedOrderId || ''}
-                            onValueChange={(value) => setSelectedOrderId(value || null)} // Actualizar el ID seleccionado
-                            disabled={loading}
-                        >
-                            <SelectTrigger id="orderSelect">
-                                <SelectValue placeholder={loading ? "Cargando pedidos..." : "Seleccione un pedido..."} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {pendingOrders.length > 0 ? (
-                                    pendingOrders.map(order => (
-                                        <SelectItem key={order.id} value={order.id}>
-                                            #{order.order_number} ({order.products?.name || 'Producto desc.'})
-                                        </SelectItem>
-                                    ))
-                                ) : (
-                                    <div className="p-2 text-center text-sm text-muted-foreground">
-                                        {loading ? 'Cargando...' : 'No hay pedidos pendientes.'}
-                                    </div>
-                                )}
-                            </SelectContent>
-                        </Select>
-                        {/* Mostrar error si la carga de pedidos falló */}
-                        {!loading && pendingOrders.length === 0 && !orderIdFromUrl && (
-                            <p className="text-xs text-red-600 mt-1">{error || 'No se encontraron pedidos pendientes.'}</p>
-                        )}
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* Mostrar Carga o Errores de Detalles */}
-            {selectedOrderId && loading && (
-                <div className="flex justify-center items-center py-10"> <Loader2 className="h-8 w-8 animate-spin text-primary" /> </div>
-            )}
-            {selectedOrderId && error && !loading && (
-                <div className="p-4 bg-destructive/10 text-destructive rounded-md">{error}</div>
-            )}
-
-            {/* Formulario de Venta (si hay un pedido válido seleccionado) */}
-            {shouldShowForm && orderDetails && (
-                <Card className="w-full max-w-3xl mx-auto border-border shadow-md">
-                    <CardHeader className="bg-muted/30">
-                        <CardTitle className="text-lg">Pedido #{orderDetails.order_number}</CardTitle>
-                        <CardDescription>
-                            Cliente: <span className="font-medium text-foreground">{orderDetails.clients?.name ?? 'N/A'}</span> |
-                            Producto: <span className="font-medium text-foreground">{orderDetails.products?.name ?? 'N/A'}</span>
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <CreateSaleForm
-                            orderId={selectedOrderId!} // Sabemos que no es nulo aquí
-                            productUnitTable={orderDetails.products?.unit_table_name || ''}
-                            availableHeights={orderDetails.availableHeights || []}
-                        />
-                    </CardContent>
-                </Card>
-            )}
         </div>
     );
 }

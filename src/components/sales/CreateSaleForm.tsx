@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState, useTransition, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Loader2, Save, XCircle, Calculator, Ruler } from 'lucide-react'; // Added Ruler icon
+import { Loader2, Save, XCircle, Calculator, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,26 +12,23 @@ import { toast } from 'sonner';
 import { ActionResponse } from '@/lib/schemas/orders';
 import { CalculatedItem } from '@/lib/schemas/sales';
 import { createSale, calculateSaleItems } from '@/app/dashboard/sales/actions';
-import { useRouter } from 'next/navigation';
-import { Separator } from '@/components/ui/separator';
-import Link from 'next/link';
-
-// Initial state
-const initialState: ActionResponse = { success: false, message: '' };
+import { useRouter, useSearchParams } from 'next/navigation';
+import { SelectOrder } from '../orders/SelectOrder';
 
 interface CreateSaleFormProps {
-    orderId: string;
-    productUnitTable: string; // Pass the unit table name determined on the server page
-    availableHeights: number[]; // Pass the available heights for the Select
+    orderId?: string; // Hacer opcional para permitir selección manual
+    productUnitTable: string;
+    availableHeights: number[];
 }
 
-// Submit button
+const initialState: ActionResponse = { success: false, message: '' };
+
 function SubmitButton() {
     const { pending } = useFormStatus();
     return (
         <Button
             type="submit"
-            className="flex-1 h-9 text-sm font-medium transition-all duration-200"
+            className="flex-1 h-11 bg-foreground hover:bg-foreground/90 text-background transition-all duration-200 hover:shadow-md"
             disabled={pending}
         >
             {pending ? (
@@ -42,215 +39,223 @@ function SubmitButton() {
             ) : (
                 <>
                     <Save className="mr-2 h-4 w-4" />
-                    Registrar Venta (Tramo)
+                    Registrar Venta
                 </>
             )}
         </Button>
     );
 }
 
-export function CreateSaleForm({ orderId, productUnitTable, availableHeights }: CreateSaleFormProps) {
+export function CreateSaleForm({
+    orderId: initialOrderId,
+    productUnitTable,
+    availableHeights
+}: CreateSaleFormProps) {
     const router = useRouter();
+    const [orderId, setOrderId] = useState(initialOrderId || '');
     const [finalState, finalFormAction] = useActionState(createSale, initialState);
-    // Use string for Select state, parse later
     const [selectedHeight, setSelectedHeight] = useState<string>('');
     const [length, setLength] = useState('');
+    const [saleDescription, setSaleDescription] = useState('');
     const [calculatedItems, setCalculatedItems] = useState<CalculatedItem[]>([]);
     const [calculationError, setCalculationError] = useState<string | null>(null);
     const [isCalculating, startCalculationTransition] = useTransition();
 
-    // Effect for final save response
+    // Efecto para redirección después de guardar
     useEffect(() => {
         if (!finalState.message) return;
         if (finalState.success) {
             toast.success(finalState.message);
-            const timer = setTimeout(() => router.push('/dashboard/orders'), 1500);
+            const timer = setTimeout(() => {
+                router.push(`/dashboard/orders/${orderId}`);
+            }, 1500);
             return () => clearTimeout(timer);
         } else {
             toast.error(finalState.message || "Ocurrió un error al guardar.");
         }
-    }, [finalState, router]);
+    }, [finalState, router, initialOrderId]);
 
-    // Parse height and length safely
+    // Manejar cambio de pedido
+    const handleOrderChange = (selectedOrderId: string) => {
+        setOrderId(selectedOrderId);
+        // Resetear cálculos al cambiar de pedido
+        setCalculatedItems([]);
+        setCalculationError(null);
+        setSelectedHeight('');
+        setLength('');
+    };
+
     const currentHeight = useMemo(() => parseFloat(selectedHeight), [selectedHeight]);
     const currentLength = useMemo(() => parseFloat(length), [length]);
 
-    // Function to call calculation action
+    // Función para calcular los materiales
     const handleCalculate = () => {
-        // Use parsed numeric values
+        if (!orderId) {
+            setCalculationError('Por favor, selecciona un pedido primero.');
+            return;
+        }
+
         if (isNaN(currentHeight) || currentHeight <= 0 || isNaN(currentLength) || currentLength <= 0) {
-            setCalculationError('Seleccione una altura e ingrese una longitud positiva.');
+            setCalculationError('Selecciona una altura e ingresa una longitud positiva.');
             setCalculatedItems([]);
             return;
         }
         setCalculationError(null);
 
         startCalculationTransition(async () => {
-            // Pass numeric values to the action
             const result = await calculateSaleItems(orderId, currentHeight, currentLength);
             if (result.success && result.items) {
                 setCalculatedItems(result.items);
                 setCalculationError(null);
             } else {
                 setCalculatedItems([]);
-                setCalculationError(result.message || 'Error al calcular.');
+                setCalculationError(result.message || 'Error al calcular los materiales.');
                 toast.error(result.message || 'No se pudieron calcular los materiales.');
             }
         });
     };
 
-    // Recalculate when valid height and length change
     useEffect(() => {
-        if (selectedHeight && length && !isNaN(currentHeight) && !isNaN(currentLength) && currentHeight > 0 && currentLength > 0) {
+        if (orderId && selectedHeight && length) {
             handleCalculate();
         } else {
-            setCalculatedItems([]); // Clear results if inputs are invalid/empty
+            setCalculatedItems([]);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedHeight, length, orderId]); // Re-run calculation when these change
+    }, [orderId, selectedHeight, length]);
 
-    const finalErrors = finalState.fieldErrors || {};
-
+    // Renderizar el formulario
     return (
-        <form action={finalFormAction} className="space-y-6">
-            <input type="hidden" name="orderId" value={orderId} />
-            {/* Pass selected numeric height to final action */}
-            <input
-                type="hidden"
-                name="height"
-                value={isNaN(currentHeight) ? '' : currentHeight.toString()}
-            />
-            <input
-                type="hidden"
-                name="length"
-                value={isNaN(currentLength) ? '' : currentLength.toString()}
-            />
+        <div className="w-full">
+            <form action={finalFormAction} className="space-y-4">
+                {/* Campos ocultos para la acción del servidor */}
+                <input type="hidden" name="orderId" value={orderId} />
+                <input type="hidden" name="height" value={currentHeight || ''} />
+                <input type="hidden" name="length" value={currentLength || ''} />
+                <input type="hidden" name="saleDescription" value={saleDescription} />
 
-            {/* General Error Display */}
-            {finalState.message && !finalState.success && !finalState.fieldErrors && (
-                <div className="flex items-center p-3 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200" role="alert">
-                    <XCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <div><span className="font-medium">Error al guardar:</span> {finalState.message}</div>
-                </div>
-            )}
-
-
-            {/* Inputs: Height (Select) and Length (Input) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* --- HEIGHT SELECT --- */}
-                <div className="space-y-1.5">
-                    <Label htmlFor="heightSelect" className="text-sm font-medium text-gray-700 flex items-center">
-                        Altura (m) *
-                    </Label>
-                    <Select
-                        name="heightSelectInternal" // Internal name, value passed via hidden input
-                        required
-                        value={selectedHeight}
-                        onValueChange={setSelectedHeight} // Update local state on change
-                        disabled={availableHeights.length === 0}
-                    >
-                        <SelectTrigger className=" border-border focus:ring-primary focus:border-primary w-full ">
-                            <SelectValue placeholder="Seleccione Altura..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {availableHeights.length > 0 ? (
-                                availableHeights.map(h => (
-                                    <SelectItem key={h} value={String(h)}>
-                                        {h} m
-                                    </SelectItem>
-                                ))
-                            ) : (
-                                <div className="relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm text-muted-foreground">
-                                    No hay alturas disponibles
-                                </div>
-                            )}
-                        </SelectContent>
-                    </Select>
-                    {/* Display validation error for height from final action */}
-                    {finalErrors.height && <p className="text-xs text-red-600 mt-1">{finalErrors.height}</p>}
-                </div>
-                {/* --- LENGTH INPUT --- */}
-                <div className="space-y-1.5">
-                    <Label htmlFor="lengthInput" className="text-sm font-medium text-gray-700">Longitud (ml) *</Label>
-                    <Input
-                        id="lengthInput"
-                        name="lengthInputInternal" // Internal name
-                        type="number"
-                        step="0.1"
-                        placeholder="Ej: 20"
-                        required
-                        value={length}
-                        onChange={(e) => setLength(e.target.value)} // Update local state
-                        className="border-border focus:ring-primary focus:border-primary"
-                        aria-invalid={!!finalErrors.length}
-                    />
-                    {finalErrors.length && <p className="text-xs text-red-600 mt-1">{finalErrors.length}</p>}
-                </div>
-            </div>
-
-            {/* Calculation Indicator & Error */}
-            {isCalculating && (
-                <div className="flex items-center text-sm text-gray-600">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Calculando materiales...
-                </div>
-            )}
-            {calculationError && !isCalculating && (
-                <div className="flex items-center text-sm text-red-600">
-                    <XCircle className="mr-2 h-4 w-4" /> {calculationError}
-                </div>
-            )}
-
-            {/* Calculated Items Display */}
-            {calculatedItems.length > 0 && !isCalculating && (
-                <div className=" space-y-1">
-                    <Separator />
-                    <h3 className="text-md font-semibold text-gray-800 flex items-center">
-                        Materiales Calculados
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm border p-4 rounded-md bg-muted/20">
-                        {calculatedItems.map(item => (
-                            <div key={item.item_key}>
-                                <span className="font-medium text-gray-700">{item.item_label || item.item_key}:</span>{' '}
-                                <span className="text-gray-900">{item.item_value}</span>{' '}
-                                <span className="text-muted-foreground">{item.item_unit}</span>
-                            </div>
-                        ))}
+                {/* Selector de pedido (solo si no viene pre-seleccionado) */}
+                {!initialOrderId && (
+                    <div className="space-y-1.5">
+                        <Label htmlFor="orderId" className="text-sm font-medium">Seleccionar Pedido *</Label>
+                        <SelectOrder
+                            value={orderId}
+                            onValueChange={handleOrderChange}
+                        />
                     </div>
-                    <Separator />
-                </div>
-            )}
-
-            {/* Optional Description */}
-            <div className="space-y-1">
-                <Label htmlFor="saleDescription" className="text-sm font-medium text-gray-700">
-                    Descripción <span className="text-xs text-muted-foreground">(Opcional)</span>
-                </Label>
-                <Textarea
-                    id="saleDescription"
-                    name="saleDescription"
-                    placeholder="Detalles específicos de este tramo..."
-                    className="min-h-[70px]"
-                />
-                {finalErrors.saleDescription && (
-                    <p className="text-xs text-red-600 mt-1">{finalErrors.saleDescription}</p>
                 )}
-            </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-                <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 h-9 text-sm font-medium border-border hover:bg-muted transition-all duration-200 bg-transparent"
-                    asChild
-                >
-                    <Link href="/dashboard/orders">
+                {/* Sección de Inputs para Cálculo */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="height" className="text-sm font-medium">Altura (m) *</Label>
+                        <Select
+                            name="height"
+                            value={selectedHeight}
+                            onValueChange={setSelectedHeight}
+                            required
+                        >
+                            <SelectTrigger className="w-full border-border focus:ring-foreground transition-colors">
+                                <SelectValue placeholder="Selecciona una altura" />
+                            </SelectTrigger>
+                            <SelectContent >
+                                {availableHeights.map((height) => (
+                                    <SelectItem key={height} value={height.toString()}>
+                                        {height} m
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="length" className="text-sm font-medium">Longitud (ml) *</Label>
+                        <Input
+                            id="length"
+                            name="length"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            value={length}
+                            onChange={(e) => setLength(e.target.value)}
+                            placeholder="Ej: 25.5"
+                            className="border-border focus:border-foreground transition-colors"
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* Botón de Cálculo y Errores */}
+                <div className="pt-2">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={handleCalculate}
+                        disabled={isCalculating || !orderId || !selectedHeight || !length || parseFloat(length) <= 0}
+                        className="w-full h-10"
+                    >
+                        {isCalculating ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Calculator className="mr-2 h-4 w-4" />
+                        )}
+                        Calcular Materiales
+                    </Button>
+
+                    {calculationError && (
+                        <div className="text-sm text-destructive p-3 bg-destructive/10 rounded-md mt-4">
+                            {calculationError}
+                        </div>
+                    )}
+                </div>
+
+                <div className="space-y-1.5 pt-4">
+                    <Label htmlFor="saleDescription" className="text-sm font-medium">Descripción (Opcional)</Label>
+                    <Textarea
+                        id="saleDescription"
+                        name="saleDescription"
+                        value={saleDescription}
+                        onChange={(e) => setSaleDescription(e.target.value)}
+                        placeholder="Detalles específicos del tramo, como ubicación o características especiales..."
+                        className="border-border focus:border-foreground transition-colors min-h-[80px] resize-none"
+                    />
+                </div>
+
+                {/* Resultados del Cálculo */}
+                <div className="space-y-1.5 pt-4">
+                    <Label className="text-sm font-medium">Materiales Calculados</Label>
+                    {calculatedItems.length > 0 ? (
+                        <div className="border rounded-md p-4 space-y-2 bg-muted/30">
+                            {calculatedItems.map((item, index) => (
+                                <div key={index} className="flex justify-between text-sm">
+                                    <span>{item.item_label || item.item_key}</span>
+                                    <span className="font-medium">
+                                        {item.item_value} {item.item_unit}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="border border-dashed rounded-md p-8 text-center text-muted-foreground flex flex-col justify-center items-center min-h-[150px]">
+                            <Calculator className="mx-auto h-8 w-8 mb-2" />
+                            <p>Los materiales calculados aparecerán aquí.</p>
+                            <p className="text-xs">Ingresa altura, longitud y presiona "Calcular".</p>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex gap-4 pt-6">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => router.back()}
+                        className="flex-1 h-11"
+                    >
                         Cancelar
-                    </Link>
-                </Button>
-                <SubmitButton />
-
-            </div>
-        </form>
+                    </Button>
+                    <SubmitButton />
+                </div>
+            </form>
+        </div>
     );
 }

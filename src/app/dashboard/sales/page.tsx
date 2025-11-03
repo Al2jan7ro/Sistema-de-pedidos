@@ -46,21 +46,8 @@ export default async function SalesPage() {
     const sales = await fetchSales();
 
     return (
-        <div className="flex-1 space-y-8 p-8 pt-6">
-            <div className="flex items-center justify-between space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">Gestión de Ventas</h2>
-                <div className="flex items-center space-x-2">
-                    {/* Botón para crear venta SIN pedido preseleccionado */}
-                    <Button asChild>
-                        <Link href="/dashboard/sales/new">
-                            <Plus className="mr-2 h-4 w-4" /> Nueva Venta (Seleccionar Pedido)
-                        </Link>
-                    </Button>
-                </div>
-            </div>
-
-            {/* Pasar las ventas al componente cliente */}
+        <>
             <SalesTable initialSales={sales} />
-        </div>
+        </>
     );
 }
