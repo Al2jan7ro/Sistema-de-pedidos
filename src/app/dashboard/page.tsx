@@ -1,8 +1,12 @@
 import { Dashboard } from "@/components/dashboard/Dashboard"
-export default function DashboardPage() {
+import { fetchDashboardData } from "@/data/dashboard"
+
+export default async function DashboardPage() {
+    const data = await fetchDashboardData()
+
     return (
         <div className="overflow-hidden">
-            <Dashboard />
+            <Dashboard data={data} />
         </div>
     )
 }

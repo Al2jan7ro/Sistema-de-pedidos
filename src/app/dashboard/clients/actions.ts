@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
+import { createServiceClient } from '@/utils/supabase/service';
 import { ClientFormSchema, DeleteClientSchema, ClientStatusEnum } from '@/lib/schemas/client';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -16,12 +17,15 @@ export type ActionResponse = {
 // Requiere el 'id' y hace que el resto de campos del formulario sean opcionales
 const UpdateClientSchema = ClientFormSchema.partial().required({ id: true });
 
+const SYSTEM_USER_ID = process.env.SUPABASE_SYSTEM_USER_ID ?? null;
+
 // 1. CREAR CLIENTE (Server Action) - 💥 CORREGIDO: Eliminado redirect
 export async function addClient(
     prevState: ActionResponse,
     formData: FormData
 ): Promise<ActionResponse> {
     const supabase = await createClient();
+    const serviceSupabase = createServiceClient();
 
     //Usar ClientFormSchema para la validación del formulario de creación.
     const rawData = Object.fromEntries(formData.entries());
@@ -46,13 +50,20 @@ export async function addClient(
     //clientData no tendrá id ni created_at, lo cual es correcto para la inserción.
     const clientData = validatedFields.data;
 
-    // 3. Insertar el cliente en Supabase
-    const { error } = await supabase.from('clients').insert({
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    const createdBy = user?.id ?? SYSTEM_USER_ID ?? null;
+
+    // 3. Insertar el cliente en Supabase usando el service client
+    const { error } = await serviceSupabase.from('clients').insert({
         name: clientData.name,
         email: clientData.email,
         phone: clientData.phone,
         address: clientData.address,
         status: clientData.status,
+        created_by: createdBy,
     });
 
     // 4. Manejar errores de la base de datos (ej. email duplicado)

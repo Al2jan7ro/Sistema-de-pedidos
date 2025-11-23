@@ -3,11 +3,36 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createClient } from "@/utils/supabase/client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export function LoginForm() {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [redirecting, setRedirecting] = useState(false);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        if (!window.location.hash) return;
+
+        const params = new URLSearchParams(window.location.hash.substring(1));
+        const oauthError = params.get('error');
+        const errorCode = params.get('error_code');
+
+        if (oauthError || errorCode) {
+            const description = params.get('error_description');
+            setError('No tienes acceso autorizado a la plataforma.');
+            console.warn('OAuth error:', { oauthError, errorCode, description });
+            setRedirecting(true);
+
+            // Limpiar el hash para evitar loops cuando el usuario regrese a /login
+            window.history.replaceState(null, '', window.location.pathname);
+
+            // Redirigir a la página personalizada de acceso denegado
+            router.replace('/unauthorized');
+        }
+    }, [router]);
 
     const handleGoogleLogin = async () => {
         setLoading(true);
@@ -30,7 +55,21 @@ export function LoginForm() {
             setError("Error al iniciar sesión con Google. Inténtalo de nuevo.");
             setLoading(false); // Detener la carga si falla antes de la redirección
         }
+
+
         // Si es exitoso, Supabase automáticamente redirige a Google.
+    }
+
+    if (redirecting) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center gap-4">
+                <span className="h-12 w-12 border-4 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+                <div>
+                    <p className="text-base font-semibold">Validando acceso...</p>
+                    <p className="text-sm text-muted-foreground">Redirigiendo a la página autorizada</p>
+                </div>
+            </div>
+        );
     }
 
     return (

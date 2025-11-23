@@ -67,7 +67,7 @@ export function CreateSaleForm({
         if (finalState.success) {
             toast.success(finalState.message);
             const timer = setTimeout(() => {
-                router.push(`/dashboard/orders/${orderId}`);
+                router.push(`/dashboard/sales`);
             }, 1500);
             return () => clearTimeout(timer);
         } else {
