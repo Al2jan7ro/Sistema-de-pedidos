@@ -73,15 +73,22 @@ export function EditSaleForm({ sale, availableHeights }: EditSaleFormProps) {
         setCalculationError(null);
         startCalculationTransition(async () => {
             // Usar el order_id de la venta
-            if (sale.order_id === null) { // Explicitly check for null
+            if (sale.order_id === null) {
                 setCalculationError('ID de pedido no encontrado para el cálculo.');
                 setCalculatedItems([]);
                 return;
             }
-            const orderIdForCalculation: string = sale.order_id; // Capture and assert type
+            const orderIdForCalculation: string = sale.order_id;
             const result = await calculateSaleItems(orderIdForCalculation, currentHeight, currentLength);
-            if (result.success && result.items) { /* ... setCalculatedItems ... */ }
-            else { /* ... setCalculationError ... */ }
+
+            if (result.success && result.items) {
+                setCalculatedItems(result.items);
+                setCalculationError(null);
+            } else {
+                setCalculatedItems([]);
+                setCalculationError(result.message || 'Error al calcular los materiales.');
+                toast.error(result.message || 'No se pudieron recalcular los materiales.');
+            }
         });
     };
 
@@ -93,7 +100,7 @@ export function EditSaleForm({ sale, availableHeights }: EditSaleFormProps) {
             setCalculatedItems([]);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedHeight, length, sale.order_id]); // Depender del order_id de la prop
+    }, [selectedHeight, length, sale.order_id]);
 
     const finalErrors = finalState.fieldErrors || {};
 
@@ -101,63 +108,101 @@ export function EditSaleForm({ sale, availableHeights }: EditSaleFormProps) {
         <form action={finalFormAction} className="space-y-6">
             {/* IDs ocultos para la acción */}
             <input type="hidden" name="saleId" value={sale.id} />
-            <input type="hidden" name="orderId" value={sale.order_id} />
-            {/* Pasar height y length finales */}
+            <input type="hidden" name="orderId" value={sale.order_id || ""} />
             <input type="hidden" name="height" value={isNaN(currentHeight) ? '' : currentHeight.toString()} />
             <input type="hidden" name="length" value={isNaN(currentLength) ? '' : currentLength.toString()} />
-            {/* Pasar descripción actualizada */}
             <input type="hidden" name="saleDescription" value={saleDescription} />
 
-
-            {/* Display de Error General */}
-            {/* ... (Igual que en Create) ... */}
-
             {/* Inputs: Height (Select) y Length */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                    <Label htmlFor="heightSelect" className="text-sm font-medium">Altura (m) *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl bg-accent/30 border border-border/50">
+                <div className="space-y-2">
+                    <Label htmlFor="heightSelect" className="text-sm font-semibold flex items-center gap-2">
+                        <Ruler className="h-4 w-4 text-primary" />
+                        Altura seleccionada (m)
+                    </Label>
                     <Select name="heightSelectInternal" required value={selectedHeight} onValueChange={setSelectedHeight} >
-                        <SelectTrigger> <SelectValue placeholder="Seleccione..." /> </SelectTrigger>
+                        <SelectTrigger className="bg-background/50 border-border/60 focus:ring-primary">
+                            <SelectValue placeholder="Seleccione..." />
+                        </SelectTrigger>
                         <SelectContent>
                             {availableHeights.map(h => <SelectItem key={h} value={String(h)}>{h} m</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    {finalErrors.height && <p className="text-xs text-red-600 mt-1">{finalErrors.height}</p>}
+                    {finalErrors.height && <p className="text-xs text-destructive mt-1 font-medium">{finalErrors.height}</p>}
                 </div>
-                <div className="space-y-1.5">
-                    <Label htmlFor="lengthInput" className="text-sm font-medium">Longitud (ml) *</Label>
-                    <Input id="lengthInput" name="lengthInputInternal" type="number" step="0.1" required value={length} onChange={(e) => setLength(e.target.value)} />
-                    {finalErrors.length && <p className="text-xs text-red-600 mt-1">{finalErrors.length}</p>}
+
+                <div className="space-y-2">
+                    <Label htmlFor="lengthInput" className="text-sm font-semibold flex items-center gap-2">
+                        <Calculator className="h-4 w-4 text-primary" />
+                        Longitud del tramo (ml)
+                    </Label>
+                    <Input
+                        id="lengthInput"
+                        name="lengthInputInternal"
+                        type="number"
+                        step="0.01"
+                        required
+                        value={length}
+                        onChange={(e) => setLength(e.target.value)}
+                        className="bg-background/50 border-border/60 focus:ring-primary"
+                    />
+                    {finalErrors.length && <p className="text-xs text-destructive mt-1 font-medium">{finalErrors.length}</p>}
                 </div>
             </div>
 
-            {/* Indicador de Cálculo y Error */}
-            {/* ... (Igual que en Create) ... */}
-
-            {/* Resultados Calculados */}
-            {calculatedItems.length > 0 && !isCalculating && (
-                <div className="mt-6 space-y-3">
-                    {/* ... (Mostrar lista de calculatedItems - Igual que en Create) ... */}
+            {/* Error de Cálculo si existe */}
+            {calculationError && (
+                <div className="text-sm text-destructive p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 animate-in fade-in zoom-in duration-200">
+                    <XCircle className="h-4 w-4" />
+                    {calculationError}
                 </div>
             )}
 
+            {/* Resultados Calculados - Diseño Premium */}
+            <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">Materiales Calculados</h3>
+                {isCalculating ? (
+                    <div className="border border-dashed border-primary/30 rounded-xl p-8 text-center bg-primary/5 animate-pulse">
+                        <Loader2 className="mx-auto h-8 w-8 mb-2 animate-spin text-primary" />
+                        <p className="text-sm font-medium text-primary">Recalculando materiales...</p>
+                    </div>
+                ) : calculatedItems.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {calculatedItems.map((item, index) => (
+                            <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-card border border-border/50 shadow-sm hover:shadow transition-all duration-200">
+                                <span className="text-sm text-muted-foreground">{item.item_label || item.item_key}</span>
+                                <span className="text-sm font-bold bg-primary/10 text-primary px-2 py-1 rounded">
+                                    {item.item_value} {item.item_unit}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="border border-dashed rounded-xl p-8 text-center text-muted-foreground bg-muted/20">
+                        <Calculator className="mx-auto h-8 w-8 mb-2 opacity-20" />
+                        <p className="text-sm">Ingresa valores para ver el desglose de materiales.</p>
+                    </div>
+                )}
+            </div>
+
             {/* Descripción (Editable) */}
-            <div className="space-y-1.5 pt-4">
-                <Label htmlFor="saleDescriptionEdit" className="text-sm font-medium">Descripción</Label>
+            <div className="space-y-2 pt-2">
+                <Label htmlFor="saleDescriptionEdit" className="text-sm font-semibold">Notas y Observaciones</Label>
                 <Textarea
                     id="saleDescriptionEdit"
-                    // name="saleDescription" // Ya se pasa por input oculto
-                    placeholder="Detalles específicos..."
-                    value={saleDescription} // Controlado por estado local
-                    onChange={(e) => setSaleDescription(e.target.value)} // Actualizar estado local
-                    className="min-h-[70px]"
+                    placeholder="Detalles específicos del tramo..."
+                    value={saleDescription}
+                    onChange={(e) => setSaleDescription(e.target.value)}
+                    className="min-h-[100px] bg-background/50 border-border/60 focus:ring-primary resize-none"
                 />
-                {finalErrors.saleDescription && <p className="text-xs text-red-600 mt-1">{finalErrors.saleDescription}</p>}
+                {finalErrors.saleDescription && <p className="text-xs text-destructive mt-1 font-medium">{finalErrors.saleDescription}</p>}
             </div>
 
             {/* Botones */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+            <div className="flex justify-end gap-3 pt-6 border-t border-border/60">
+                <Button type="button" variant="outline" onClick={() => router.back()} className="h-11 px-8 hover:bg-accent/50">
+                    Cancelar
+                </Button>
                 <SubmitButton />
             </div>
         </form>

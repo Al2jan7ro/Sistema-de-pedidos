@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import { EditSaleForm } from '@/components/sales/EditSaleForm';
 import { SaleForEditPageProps } from '@/lib/schemas/sales'; // Import the new type
 
@@ -81,8 +81,8 @@ async function fetchSaleForEdit(saleId: string): Promise<SaleForEditPageProps | 
 }
 
 
-export default async function EditSalePage({ params }: { params: { id: string } }) {
-    const saleId = params.id;
+export default async function EditSalePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id: saleId } = await params;
     const saleData = await fetchSaleForEdit(saleId);
 
     if (!saleData) {
@@ -111,26 +111,63 @@ export default async function EditSalePage({ params }: { params: { id: string } 
     }
 
     return (
-        <div className="flex-1 space-y-8 p-8 pt-6">
+        <div className="flex-1 p-4 md:p-6 lg:p-8">
+            <div className="w-full space-y-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            asChild
+                            className="rounded-full hover:bg-accent"
+                        >
+                            <Link href="/dashboard/sales">
+                                <ArrowLeft className="h-5 w-5" />
+                            </Link>
+                        </Button>
+                        <div>
+                            <h2 className="text-2xl font-bold tracking-tight">Editar Venta</h2>
+                            <p className="text-sm text-muted-foreground">
+                                Venta #{saleData.sale_code} • Pedido #{saleData.orders.order_number}
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-            <h2 className="text-3xl font-bold tracking-tight">
-                Editar Venta #{saleData.sale_code} (Pedido #{saleData.orders.order_number})
-            </h2>
-            <Card className="w-full max-w-3xl mx-auto border-border shadow-md">
-                <CardHeader className="bg-muted/30">
-                    <CardTitle className="text-lg">Pedido #{saleData.orders.order_number}</CardTitle>
-                    <CardDescription>
-                        Cliente: <span className="font-medium text-foreground">{saleData.orders.clients?.name ?? 'N/A'}</span> |
-                        Producto: <span className="font-medium text-foreground">{saleData.orders.products?.name ?? 'N/A'}</span>
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                    <EditSaleForm
-                        sale={saleData} // Pasar todos los datos de la venta
-                        availableHeights={saleData.availableHeights}
-                    />
-                </CardContent>
-            </Card>
+                <Card className="w-full border-border shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                    <CardHeader className="bg-muted/40 border-b border-border/50 py-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <CardTitle className="text-xl flex items-center gap-2">
+                                    <ShoppingCart className="h-5 w-5 text-primary" />
+                                    Detalles del Pedido Original
+                                </CardTitle>
+                                <CardDescription className="text-base mt-1">
+                                    Información consolidada de la transacción
+                                </CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 bg-muted/20 border-b border-border/50">
+                        <div className="p-4 border-r border-border/50 flex flex-col gap-1">
+                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Cliente</span>
+                            <span className="font-semibold text-lg">{saleData.orders.clients?.name ?? 'N/A'}</span>
+                        </div>
+                        <div className="p-4 flex flex-col gap-1">
+                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Producto</span>
+                            <span className="font-semibold text-lg">{saleData.orders.products?.name ?? 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <CardContent className="pt-8 pb-8 px-6 md:px-10">
+                        <EditSaleForm
+                            sale={saleData}
+                            availableHeights={saleData.availableHeights}
+                        />
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

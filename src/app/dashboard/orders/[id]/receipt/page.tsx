@@ -29,7 +29,8 @@ async function fetchOrderBaseDetails(orderId: string) {
     return data;
 }
 
-export default async function OrderReceiptPage({ params: { id: orderId } }: { params: { id: string } }) {
+export default async function OrderReceiptPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id: orderId } = await params;
     // 1. Obtener detalles base del pedido
     const orderDetails = await fetchOrderBaseDetails(orderId);
 

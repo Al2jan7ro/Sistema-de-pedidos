@@ -7,6 +7,7 @@ export interface DashboardMetrics {
     totalOrders: number;
     // Cambiado para reflejar que ahora sumamos la longitud
     totalLengthSold: number;
+    totalSalesCount: number;
     activeClients: number;
     pendingOrders: number;
 }
@@ -39,7 +40,7 @@ export interface DashboardData {
 
 const MONTHS_RANGE = 6;
 const WEEK_DAYS_RANGE = 7;
-const ACTIVE_CLIENTS_WINDOW_DAYS = 90;
+const ACTIVE_CLIENTS_WINDOW_DAYS = 365; // Aumentado a 1 año para mostrar datos reales de prueba
 
 // Usamos los tipos de la base de datos para mayor consistencia
 type OrderStatus = Tables<'orders'>['status'];
@@ -86,6 +87,7 @@ const emptyDashboardData = (): DashboardData => ({
     metrics: {
         totalOrders: 0,
         totalLengthSold: 0,
+        totalSalesCount: 0,
         activeClients: 0,
         pendingOrders: 0,
     },
@@ -228,7 +230,8 @@ export async function fetchDashboardData(): Promise<DashboardData> {
         return {
             metrics: {
                 totalOrders: totalOrders ?? 0,
-                totalLengthSold: Math.round(totalLengthSold), // Redondeamos para mostrar
+                totalLengthSold: Math.round(totalLengthSold),
+                totalSalesCount: salesData?.length ?? 0,
                 activeClients,
                 pendingOrders: pendingOrders ?? 0,
             },
