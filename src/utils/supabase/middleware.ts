@@ -27,7 +27,7 @@ export const createClient = (request: NextRequest) => {
         },
         setAll(cookiesToSet) {
           // Las cookies se establecen primero en la Request y luego en la Response
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({

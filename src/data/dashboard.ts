@@ -56,7 +56,6 @@ const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
     Completado: "oklch(0.6 0.118 184.704)",
     Cancelado: "oklch(0.398 0.07 227.392)",
 };
-const DEFAULT_STATUS_COLOR = "hsl(var(--muted))";
 
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -212,7 +211,7 @@ export async function fetchDashboardData(): Promise<DashboardData> {
 
         // --- Procesamiento de Distribución de Estados (desde RPC) ---
         const statusTotals = new Map<OrderStatus, number>(
-            statusDistributionData?.map(row => [row.status as OrderStatus, Number(row.status_count) || 0])
+            statusDistributionData?.map((row: { status: string; status_count: number }) => [row.status as OrderStatus, Number(row.status_count) || 0])
         );
 
         const statusDistribution: StatusDistributionSlice[] = [];

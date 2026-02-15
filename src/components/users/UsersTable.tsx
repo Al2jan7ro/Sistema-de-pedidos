@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
 
 type User = {
   id: string;

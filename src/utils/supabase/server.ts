@@ -23,7 +23,7 @@ export const createClient = async () => {
 
           try {
             cookieStore.set({ name, value, ...options })
-          } catch (error) {
+          } catch (_error) {
 
             // Manejo de error silencioso para Server Components
 
@@ -35,7 +35,7 @@ export const createClient = async () => {
           try {
             cookieStore.set({ name, value: '', ...options })
 
-          } catch (error) {
+          } catch (_error) {
 
             // Manejo de error silencioso para Server Components
           }

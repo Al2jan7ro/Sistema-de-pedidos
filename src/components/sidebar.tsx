@@ -9,7 +9,6 @@ import {
     Package,
     Users,
     FunnelPlus,
-    UserCircle,
     LogOut,
     ChevronRight,
     Menu,
@@ -17,6 +16,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 // INTERFACE: Ahora acepta las props de usuario del servidor
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -141,7 +141,7 @@ export function AppSidebar({
                 <div className="flex h-full flex-col">
                     {/* Header */}
                     <div className="flex h-16 items-center justify-between border-b border-border px-4">
-                        {!isCollapsed && <img src="/assets/gaviotylogo.png" alt="Logo" width="120" height="120" />}
+                        {!isCollapsed && <Image src="/assets/gaviotylogo.png" alt="Logo" width={120} height={120} />}
 
                     </div>
 
