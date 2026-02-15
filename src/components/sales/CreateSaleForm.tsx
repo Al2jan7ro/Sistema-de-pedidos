@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState, useTransition, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Loader2, Save, XCircle, Calculator, ArrowLeft, ShoppingCart, Ruler } from 'lucide-react';
+import { Loader2, Save, XCircle, Calculator, ShoppingCart, Ruler } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,12 +12,11 @@ import { toast } from 'sonner';
 import { ActionResponse } from '@/lib/schemas/orders';
 import { CalculatedItem } from '@/lib/schemas/sales';
 import { createSale, calculateSaleItems } from '@/app/dashboard/sales/actions';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { SelectOrder } from '../orders/SelectOrder';
 
 interface CreateSaleFormProps {
     orderId?: string; // Hacer opcional para permitir selección manual
-    productUnitTable: string;
     availableHeights: number[];
 }
 
@@ -48,7 +47,6 @@ function SubmitButton() {
 
 export function CreateSaleForm({
     orderId: initialOrderId,
-    productUnitTable,
     availableHeights
 }: CreateSaleFormProps) {
     const router = useRouter();

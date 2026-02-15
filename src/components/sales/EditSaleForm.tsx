@@ -13,7 +13,6 @@ import { ActionResponse } from '@/lib/schemas/orders';
 import { CalculatedItem, SaleForEditPageProps } from '@/lib/schemas/sales'; // Use SaleForEditPageProps for props
 import { updateSale, calculateSaleItems } from '@/app/dashboard/sales/actions'; // Usar updateSale
 import { useRouter } from 'next/navigation';
-import { Separator } from '@/components/ui/separator';
 
 // Estado inicial
 const initialState: ActionResponse = { success: false, message: '' }; // Keep this as ActionResponse

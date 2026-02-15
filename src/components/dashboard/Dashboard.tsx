@@ -17,6 +17,7 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Package, ShoppingCart, Users, Clock } from "lucide-react"
 import { DashboardData } from "@/data/dashboard"
+import Image from "next/image"
 
 interface DashboardProps {
     data: DashboardData
@@ -29,7 +30,7 @@ export function Dashboard({ data }: DashboardProps) {
         <div className="w-full space-y-6 p-6">
             {/* Header */}
             <div className="flex items-center gap-3 pb-2">
-                <img src="/assets/gaviotylogo.png" alt="Logo" width="120" height="120" />
+                <Image src="/assets/gaviotylogo.png" alt="Logo" width={120} height={120} />
 
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>

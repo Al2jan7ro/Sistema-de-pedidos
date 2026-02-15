@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createClient } from "@/utils/supabase/client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 export function LoginForm() {
     const router = useRouter();
@@ -76,7 +77,7 @@ export function LoginForm() {
         <Card className="w-full max-w-md mx-4 border-border shadow-lg">
             <CardHeader className="space-y-3 text-center pb-8">
                 <div className="flex justify-center mb-2">
-                    <img
+                    <Image
                         src="/assets/gaviotylogo.png"
                         alt="Logo de la empresa Gavioty Pro solutions"
                         width={200}

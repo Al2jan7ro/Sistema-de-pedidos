@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Search, Edit, FileText, Plus, DollarSign } from 'lucide-react';
+import { Search, Edit, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from "@/components/ui/badge"
 import { CancelSaleButton } from './CancelSaleButton';
+import Image from 'next/image';
 
 interface SalesTableProps {
     initialSales: SaleExtended[];
@@ -81,7 +82,7 @@ export function SalesTable({ initialSales }: SalesTableProps) {
         <Card className="w-full border-border shadow-lg min-h-[40vw]">
             <CardHeader className="space-y-3 pb-6">
                 <div className="flex items-center gap-3">
-                    <img src="/assets/gaviotylogo.png" alt="Logo" width="120" height="120" />
+                    <Image src="/assets/gaviotylogo.png" alt="Logo" width={120} height={120} />
 
                     <div>
                         <CardTitle className="text-2xl font-bold tracking-tight">Gestión de Ventas</CardTitle>

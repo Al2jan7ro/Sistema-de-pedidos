@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Product } from '@/lib/schemas/product';
 import { DeleteProductButton } from './DeleteProductButton';
+import Image from 'next/image';
 import {
     HoverCard,
     HoverCardContent,
@@ -42,7 +43,7 @@ export function ProductListTable({ products, canMutate, canCreate }: ProductList
         <Card className="w-full border-border shadow-lg min-h-[40vw]">
             <CardHeader className="space-y-3 pb-6">
                 <div className="flex items-center gap-3">
-                    <img src="/assets/gaviotylogo.png" alt="Logo" width="120" height="120" />
+                    <Image src="/assets/gaviotylogo.png" alt="Logo" width={120} height={120} />
                     <div>
                         <CardTitle className="text-2xl font-bold tracking-tight">Productos</CardTitle>
                         <CardDescription className="text-sm text-muted-foreground">

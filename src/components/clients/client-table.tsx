@@ -10,6 +10,7 @@ import Link from "next/link"
 import { format } from "date-fns"
 import { Client } from "@/lib/schemas/client"
 import { ClientDeleteButton } from "./ClientDeleteButton"
+import Image from "next/image"
 
 // Tipificación de las props
 interface ClientTableProps {
@@ -61,7 +62,7 @@ export function ClientTable({ initialClients }: ClientTableProps) {
             <CardHeader className="space-y-3 pb-6">
                 <div className="flex items-center gap-3">
                     {/* Ajusta esta ruta de imagen si es necesario */}
-                    <img src="/assets/gaviotylogo.png" alt="Logo" width="120" height="120" />
+                    <Image src="/assets/gaviotylogo.png" alt="Logo" width={120} height={120} />
                     <div>
                         <CardTitle className="text-2xl font-bold tracking-tight">Clientes</CardTitle>
                         <CardDescription className="text-sm text-muted-foreground">

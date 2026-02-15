@@ -20,26 +20,18 @@ export const createClient = async () => {
         },
 
         set(name: string, value: string, options: CookieOptions) {
-
           try {
             cookieStore.set({ name, value, ...options })
-          } catch (_error) {
-
+          } catch {
             // Manejo de error silencioso para Server Components
-
           }
-
         },
-
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options })
-
-          } catch (_error) {
-
+          } catch {
             // Manejo de error silencioso para Server Components
           }
-
         },
 
       },

@@ -13,6 +13,7 @@ import { DeleteOrderButton } from './DeleteOrderButton';
 import { Badge } from "@/components/ui/badge"
 // IMPORTAR EL NUEVO COMPONENTE
 import { AttachmentsViewer } from './AttachmentsViewer';
+import Image from 'next/image';
 
 // Tipificación de las props
 interface OrderTableProps {
@@ -83,7 +84,7 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
         <Card className="w-full border-border shadow-lg min-h-[40vw]">
             <CardHeader className="space-y-3 pb-6">
                 <div className="flex items-center gap-3">
-                    <img src="/assets/gaviotylogo.png" alt="Logo" width="120" height="120" />
+                    <Image src="/assets/gaviotylogo.png" alt="Logo" width={120} height={120} />
 
                     <div>
                         <CardTitle className="text-2xl font-bold tracking-tight">Pedidos de Obra</CardTitle>

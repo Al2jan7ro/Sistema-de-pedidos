@@ -190,7 +190,7 @@ export function ReceiptView({ data }: ReceiptViewProps) {
     // Memoizamos la creación del documento para evitar re-renders infinitos.
     const memoizedDocument = useMemo(() => <ReceiptPdf data={data} />, [data]);
 
-    const [instance, updateInstance] = usePDF({ document: memoizedDocument });
+    const [instance] = usePDF({ document: memoizedDocument });
 
     const handlePrint = () => {
         if (instance.loading || !instance.url) {
