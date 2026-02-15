@@ -43,7 +43,7 @@ async function fetchSaleForEdit(saleId: string): Promise<SaleForEditPageProps | 
     }
 
     // Initialize the result object with sale data and default values for new properties
-    let result: SaleForEditPageProps = {
+    const result: SaleForEditPageProps = {
         ...(sale as SaleForEditPageProps), // Use type assertion here
         availableHeights: [], // Initialize as empty array
         error: null, // Initialize as null

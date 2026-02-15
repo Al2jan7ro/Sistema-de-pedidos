@@ -3,7 +3,6 @@
 import { createClient } from '@/utils/supabase/server';
 
 import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
 import { ActionResponse } from '@/lib/schemas/orders';
 import {
     SaleInputSchema, // Use the base schema for create input
@@ -137,9 +136,9 @@ export async function calculateSaleItems(
         // Return calculated items and the raw unit row used
         return { success: true, items: calculatedItems, unitRowUsed: unitRow };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error en calculateSaleItems:', error);
-        return { success: false, message: error.message || 'Error interno al calcular.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error interno al calcular.' };
     }
 }
 
@@ -212,9 +211,9 @@ export async function createSale(
 
         return { success: true, message: `Venta ${saleCode} registrada con ${itemsToInsert.length} materiales.` };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error en createSale:', error);
-        return { success: false, message: error.message || 'Error interno al crear la venta.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error interno al crear la venta.' };
     }
 }
 
@@ -281,9 +280,9 @@ export async function updateSale(
 
         return { success: true, message: `Venta actualizada con éxito.` };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error en updateSale:', error);
-        return { success: false, message: error.message || 'Error interno al actualizar.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error interno al actualizar.' };
     }
 }
 
@@ -319,9 +318,9 @@ export async function cancelSale(
 
         return { success: true, message: 'Venta cancelada con éxito.' };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error en cancelSale:', error);
-        return { success: false, message: error.message || 'Error interno al cancelar.' };
+        return { success: false, message: error instanceof Error ? error.message : 'Error interno al cancelar.' };
     }
 }
 
@@ -361,14 +360,14 @@ export async function getOrderTotals(orderId: string) {
             return { materials: [], totalLength: 0, error: "Error al calcular los totales del pedido." };
         }
 
-        const materials = (materialsResult.data || []).map(mat => ({
+        const materials = (materialsResult.data || []).map((mat: { item_key: string; item_unit: string; total_value: number }) => ({
             ...mat,
             label: ITEM_KEY_TO_LABEL[mat.item_key] || mat.item_key
         }));
         const totalLength = totalLengthResult.data || 0;
 
         return {
-            materials: materials.filter(m => m.total_value > 0) as {
+            materials: materials.filter((m: { total_value: number }) => m.total_value > 0) as {
                 item_key: string;
                 item_unit: string;
                 total_value: number;

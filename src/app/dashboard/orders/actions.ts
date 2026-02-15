@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { CreateOrderSchema, DeleteOrderSchema, UpdateOrderSchema, ActionResponse } from '@/lib/schemas/orders'; // Importamos los esquemas y ActionResponse
 import { format } from 'date-fns';
-import { z } from 'zod';
 
 // --- CONFIGURACIÓN DE ADJUNTOS ---
 // Tipos MIME permitidos (Imágenes, PDF y CAD comunes)
@@ -48,11 +47,14 @@ export async function addOrder(
     const validatedFields = CreateOrderSchema.safeParse(rawData);
 
     if (!validatedFields.success) {
-        const fieldErrors: Record<string, string> = {};
+        const fieldErrors: Record<string, string[]> = {};
         for (const issue of validatedFields.error.issues) {
             const fieldName = issue.path[0];
             if (typeof fieldName === 'string') {
-                fieldErrors[fieldName] = issue.message;
+                if (!fieldErrors[fieldName]) {
+                    fieldErrors[fieldName] = [];
+                }
+                fieldErrors[fieldName].push(issue.message);
             }
         }
         return { success: false, message: 'Completa los campos obligatorios.', fieldErrors };
@@ -177,7 +179,7 @@ export async function updateOrder(
     // Extraemos el ID y el campo especial para el número de pedido
     const { id, order_number_input, ...updateData } = validatedFields.data;
 
-    const payload: Record<string, any> = {};
+    const payload: Record<string, unknown> = {};
 
     // Mapear campos actualizables
     for (const [key, value] of Object.entries(updateData)) {

@@ -1,11 +1,9 @@
 'use client';
 
 import { createClient } from '@/utils/supabase/client'; // Usar cliente de cliente
-import { useRouter, useSearchParams } from 'next/navigation'; // Hooks de cliente
+import { useSearchParams } from 'next/navigation'; // Hooks de cliente
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { CreateSaleForm } from '@/components/sales/CreateSaleForm';
 import { useEffect, useState, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -34,7 +32,6 @@ interface OrderDetails {
 }
 
 export default function NewSalePage() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const orderIdFromUrl = searchParams?.get('orderId');
 
@@ -54,7 +51,7 @@ export default function NewSalePage() {
                     setPendingOrders(orders as OrderOption[]);
                     setLoading(false);
                 })
-                .catch(err => {
+                .catch(() => {
                     setError("Error al cargar pedidos pendientes.");
                     setLoading(false);
                 });
@@ -100,8 +97,8 @@ export default function NewSalePage() {
 
                 setOrderDetails({ ...orderData, availableHeights } as OrderDetails);
 
-            } catch (err: any) {
-                setError(err.message || 'Error al cargar detalles del pedido.');
+            } catch (err: unknown) {
+                setError(err instanceof Error ? err.message : 'Error al cargar detalles del pedido.');
                 setOrderDetails(null); // Limpiar detalles en error
             } finally {
                 setLoading(false);
@@ -177,7 +174,6 @@ export default function NewSalePage() {
                         <CardContent className="pt-6">
                             <CreateSaleForm
                                 orderId={selectedOrderId!} // Sabemos que no es nulo aquí
-                                productUnitTable={orderDetails.products?.unit_table_name || ''}
                                 availableHeights={orderDetails.availableHeights || []}
                             />
                         </CardContent>

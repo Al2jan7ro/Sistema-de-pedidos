@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
@@ -21,7 +21,7 @@ const BUCKET_NAME = 'order-files'; // Asegúrate que coincida con tu Server Acti
 
 // --- Componente de Fila de Adjunto ---
 const AttachmentRow = ({ attachment }: { attachment: Attachment }) => {
-    const [signedUrl, setSignedUrl] = useState<string | null>(null);
+    const [, setSignedUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     // Mapeo de íconos por tipo
@@ -29,7 +29,7 @@ const AttachmentRow = ({ attachment }: { attachment: Attachment }) => {
         switch (type) {
             case 'PDF': return <FileText className="h-4 w-4 text-red-500 mr-2" />;
             case 'CAD': return <FileSearch className="h-4 w-4 text-blue-500 mr-2" />;
-            case 'Imagen': return <Image className="h-4 w-4 text-green-500 mr-2" />;
+            case 'Imagen': return <Image className="h-4 w-4 text-green-500 mr-2" aria-label="Imagen" />;
             default: return <FileDown className="h-4 w-4 text-gray-500 mr-2" />;
         }
     };

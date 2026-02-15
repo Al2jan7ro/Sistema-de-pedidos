@@ -269,7 +269,7 @@ export async function updateUser(
     return { success: false, message: 'Solo los administradores pueden cambiar roles.' };
   }
 
-  const updates: Record<string, any> = {};
+  const updates: Record<string, unknown> = {};
 
   if ('first_name' in payload) {
     updates.first_name = normalizeOptionalString(payload.first_name);

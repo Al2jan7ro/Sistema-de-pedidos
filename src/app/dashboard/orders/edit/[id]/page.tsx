@@ -5,7 +5,7 @@ import {
     DropdownOption
 } from '@/lib/schemas/orders';
 import { EditOrderForm } from '@/components/orders/EditOrderForm';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface EditPageProps {
     params: { id: string };
@@ -89,7 +89,7 @@ export default async function EditOrderPage({ params }: EditPageProps) {
                 <Card className="shadow-lg border-border">
                     <CardHeader>
                         <CardTitle>Pedido No Encontrado</CardTitle>
-                        <CardDescription>El pedido con ID "{orderId}" no existe o no tiene permisos para acceder.</CardDescription>
+                        <CardDescription>El pedido con ID &quot;{orderId}&quot; no existe o no tiene permisos para acceder.</CardDescription>
                     </CardHeader>
                 </Card>
             </div>

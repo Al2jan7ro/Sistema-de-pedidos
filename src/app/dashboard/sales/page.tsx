@@ -1,9 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { Plus } from 'lucide-react';
 import { SalesTable } from '@/components/sales/SalesTable'; // El componente de tabla cliente
 import { SaleExtended } from '@/lib/schemas/sales';
 
@@ -39,7 +35,7 @@ async function fetchSales(): Promise<SaleExtended[]> {
     }
 
     // Asegurar que TS infiera el tipo correcto
-    return (data as any[]) as SaleExtended[];
+    return data as unknown as SaleExtended[];
 }
 
 export default async function SalesPage() {

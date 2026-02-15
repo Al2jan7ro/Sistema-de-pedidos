@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { EditSaleForm } from '@/components/sales/EditSaleForm'; // Formulario de edición (cliente)
+import { SaleForEditPageProps } from '@/lib/schemas/sales';
 
 // Función para obtener la venta, su pedido asociado Y las alturas disponibles
-async function fetchSaleForEdit(saleId: string) {
+async function fetchSaleForEdit(saleId: string): Promise<SaleForEditPageProps | null> {
     const supabase = await createClient();
     // ... (Verificar rol de Admin - igual que en NewSalePage) ...
     const { data: { user } } = await supabase.auth.getUser();
@@ -43,12 +44,12 @@ async function fetchSaleForEdit(saleId: string) {
 
     // No permitir editar ventas canceladas
     if (sale.status === 'Cancelled') {
-        return { ...sale, error: 'Esta venta ha sido cancelada y no puede editarse.' };
+        return { ...sale, error: 'Esta venta ha sido cancelada y no puede editarse.', availableHeights: [] } as SaleForEditPageProps;
     }
 
     // Si no hay pedido asociado (error de datos) o tabla de unidades
     if (!sale.orders?.products?.unit_table_name) {
-        return { ...sale, error: 'El pedido asociado o su producto no están configurados correctamente.' };
+        return { ...sale, error: 'El pedido asociado o su producto no están configurados correctamente.', availableHeights: [] } as SaleForEditPageProps;
     }
 
     const unitTableName = sale.orders.products.unit_table_name;
@@ -69,7 +70,7 @@ async function fetchSaleForEdit(saleId: string) {
     }
 
     // Devolver la venta combinada con las alturas
-    return { ...sale, availableHeights, error: null };
+    return { ...sale, availableHeights, error: null } as SaleForEditPageProps;
 }
 
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { updateOrder } from '@/app/dashboard/orders/actions';
 import {
@@ -9,13 +9,13 @@ import {
     DropdownOption,
     OrderStatusEnum
 } from '@/lib/schemas/orders';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save, Undo2, XCircle } from 'lucide-react';
+import { Loader2, Save, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Estado inicial para la Server Action
@@ -52,7 +52,6 @@ function SubmitButton() {
 
 export function EditOrderForm({ order, clients, products }: EditOrderFormProps) {
     const [state, formAction] = useFormState(updateOrder, initialState);
-    const [isPending, setIsPending] = useState(false);
 
     // Almacena errores de campo para el resaltado
     const fieldErrors = useMemo(() => state.fieldErrors || {}, [state.fieldErrors]);
@@ -63,7 +62,7 @@ export function EditOrderForm({ order, clients, products }: EditOrderFormProps) 
 
         if (state.success) {
             toast.success(state.message);
-            const timer = setTimeout(() => {
+            setTimeout(() => {
                 window.location.href = '/dashboard/orders';
             }, 1000);
         } else {
@@ -76,11 +75,7 @@ export function EditOrderForm({ order, clients, products }: EditOrderFormProps) 
 
     return (
         <form
-            action={async (formData) => {
-                setIsPending(true);
-                await formAction(formData);
-                setIsPending(false);
-            }}
+            action={formAction}
             className="space-y-6"
         >
             <Card className="shadow-lg border-border">

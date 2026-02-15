@@ -29,7 +29,7 @@ export default async function UsersPage() {
   // Obtener la lista de usuarios
   const users = await getUsers();
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
     'use server';
     // La lógica de eliminación se manejará en el cliente
   };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState, useRef, useEffect } from 'react';
+import { useActionState, useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Client } from '@/lib/schemas/client';
@@ -38,6 +38,26 @@ export function CreateOrderForm({ clients, products }: CreateOrderFormProps) {
     const formRef = useRef<HTMLFormElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Lógica secuencial para la subida de archivos
+    const handleUpload = useCallback(async (orderId: string) => {
+        setIsUploading(true);
+        // Llamada a la Server Action para subir archivos
+        const fileUploadResponse = await uploadOrderAttachments(orderId, selectedFiles);
+
+        if (fileUploadResponse.success) {
+            toast.success(fileUploadResponse.message);
+        } else {
+            // Error de subida: ya sea por RLS, ruta incorrecta, o error de Supabase
+            toast.error(`Error de adjuntos: ${fileUploadResponse.message}`);
+        }
+
+        setIsUploading(false);
+        // Limpiamos la selección y redirigimos
+        setSelectedFiles([]);
+        formRef.current?.reset();
+        setTimeout(() => router.push('/dashboard/orders'), 1500);
+    }, [selectedFiles, router]);
+
     // Manejo de Respuesta de la Server Action (addOrder)
     useEffect(() => {
         if (!state.message) return;
@@ -57,27 +77,7 @@ export function CreateOrderForm({ clients, products }: CreateOrderFormProps) {
             // Mostrar errores de validación o DB
             toast.error(state.message);
         }
-    }, [state, router, selectedFiles]);
-
-    // Lógica secuencial para la subida de archivos
-    const handleUpload = async (orderId: string) => {
-        setIsUploading(true);
-        // Llamada a la Server Action para subir archivos
-        const fileUploadResponse = await uploadOrderAttachments(orderId, selectedFiles);
-
-        if (fileUploadResponse.success) {
-            toast.success(fileUploadResponse.message);
-        } else {
-            // Error de subida: ya sea por RLS, ruta incorrecta, o error de Supabase
-            toast.error(`Error de adjuntos: ${fileUploadResponse.message}`);
-        }
-
-        setIsUploading(false);
-        // Limpiamos la selección y redirigimos
-        setSelectedFiles([]);
-        formRef.current?.reset();
-        setTimeout(() => router.push('/dashboard/orders'), 1500);
-    };
+    }, [state, router, selectedFiles, handleUpload]);
 
     // 🔴 FUNCIÓN CORREGIDA: Manejar la acumulación y el límite de archivos.
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
