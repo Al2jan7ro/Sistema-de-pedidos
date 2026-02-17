@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 type User = {
   id: string;
@@ -24,66 +25,69 @@ export function UsersTable({ users, onDelete }: UsersTableProps) {
 
 
 
-    <div className="rounded-md border">
-
-
-
+    <div className="relative border border-border/50 rounded-xl overflow-hidden bg-background/30 shadow-inner mt-4">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nombre</TableHead>
-            <TableHead>Apellido</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Rol</TableHead>
-            <TableHead>Fecha de creación</TableHead>
-            <TableHead className="text-right">Acciones</TableHead>
+        <TableHeader className="bg-muted/50">
+          <TableRow className="hover:bg-transparent border-border/50">
+            <TableHead className="font-bold text-foreground">Nombre</TableHead>
+            <TableHead className="font-bold text-foreground">Apellido</TableHead>
+            <TableHead className="font-bold text-foreground">Email</TableHead>
+            <TableHead className="font-bold text-foreground">Rol</TableHead>
+            <TableHead className="font-bold text-foreground">Creación</TableHead>
+            <TableHead className="text-right font-bold text-foreground">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-4">
-                No hay usuarios registrados
+              <TableCell colSpan={6} className="text-center py-12 text-muted-foreground italic">
+                No hay usuarios registrados en el sistema.
               </TableCell>
             </TableRow>
           ) : (
             users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.first_name || '-'}</TableCell>
+              <TableRow key={user.id} className="hover:bg-foreground/[0.02] border-border/40 transition-colors">
+                <TableCell className="font-semibold">{user.first_name || '-'}</TableCell>
                 <TableCell>{user.last_name || '-'}</TableCell>
-                <TableCell>{user.email}</TableCell>
+                <TableCell className="text-muted-foreground">{user.email}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 text-xs rounded-full ${user.role === 'admin'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
-                    }`}>
+                  <Badge
+                    variant="default"
+                    className={`text-xs font-medium border ${user.role === 'admin'
+                        ? 'bg-blue-100 text-blue-800 border-blue-200'
+                        : 'bg-green-100 text-green-800 border-green-200'
+                      } hover:bg-transparent cursor-default capitalize`}
+                  >
                     {user.role}
-                  </span>
+                  </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-xs text-muted-foreground">
                   {user.created_at ? (
                     new Date(user.created_at).toLocaleDateString('es-ES', {
                       year: 'numeric',
-                      month: 'long',
+                      month: 'short',
                       day: 'numeric',
                     })
                   ) : (
                     'N/A'
                   )}
                 </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Link href={`/dashboard/users/${user.id}`}>
-                    <Button variant="outline" size="icon">
-                      <Pencil className="h-4 w-4" />
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Link href={`/dashboard/users/${user.id}`}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-foreground hover:text-background transition-all">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all"
+                      onClick={() => onDelete(user.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  </Link>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => onDelete(user.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))

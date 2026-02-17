@@ -436,6 +436,14 @@ export type Database = {
             [_ in never]: never
         }
         Functions: {
+            add_column_to_table: {
+                Args: { p_column_name: string; p_table_name: string }
+                Returns: undefined
+            }
+            drop_column_from_table: {
+                Args: { p_column_name: string; p_table_name: string }
+                Returns: undefined
+            }
             get_order_status_distribution: {
                 Args: never
                 Returns: {
@@ -451,6 +459,20 @@ export type Database = {
                     item_unit: string
                     total_value: number
                 }[]
+            }
+            get_table_columns: {
+                Args: { table_name_text: string }
+                Returns: {
+                    column_name: string
+                }[]
+            }
+            rename_column_in_table: {
+                Args: {
+                    p_table_name: string
+                    p_old_column_name: string
+                    p_new_column_name: string
+                }
+                Returns: undefined
             }
             get_user_role: { Args: never; Returns: string }
         }

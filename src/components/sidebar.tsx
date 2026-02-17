@@ -69,7 +69,7 @@ const allMenuItems = [
     },
 
     {
-        title: "Materiales (Proximamente)",
+        title: "Materiales",
         icon: FunnelPlus,
         href: "/dashboard/materials",
         adminOnly: true, // Solo Admin

@@ -5,6 +5,8 @@ import { Plus } from 'lucide-react';
 import { getUsers } from './actions';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import Image from "next/image";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default async function UsersPage() {
   const supabase = await createClient();
@@ -37,25 +39,36 @@ export default async function UsersPage() {
   return (
 
 
-    <div className="rounded-lg border bg-card p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Gestión de Usuarios</h1>
-          <p className="text-muted-foreground">
-            Administra los usuarios del sistema y sus permisos
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/dashboard/users/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Usuario
-          </Link>
-        </Button>
-      </div>
-      <UsersTable
-        users={users || []}
-        onDelete={handleDelete}
-      />
+    <div className="max-w-7xl mx-auto space-y-6 pt-2">
+      <Card className="w-full border-border shadow-xl bg-card/50 backdrop-blur-sm">
+        <CardHeader className="space-y-4 pb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Image src="/assets/gaviotylogo.png" alt="Logo" width={120} height={120} />
+              <div>
+                <CardTitle className="text-2xl font-bold tracking-tight">Gestión de Usuarios</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Administra los roles y accesos del personal de Gavioty Solutions.
+                </CardDescription>
+              </div>
+            </div>
+
+            <Button asChild className="h-10 bg-foreground hover:bg-foreground/90 text-background shadow-md transition-all font-semibold">
+              <Link href="/dashboard/users/new" className="flex items-center">
+                <Plus className="mr-2 h-4 w-4" />
+                Nuevo Usuario
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="pb-6">
+          <UsersTable
+            users={users || []}
+            onDelete={handleDelete}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
