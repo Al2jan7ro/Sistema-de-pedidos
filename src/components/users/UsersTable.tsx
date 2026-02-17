@@ -29,12 +29,12 @@ export function UsersTable({ users, onDelete }: UsersTableProps) {
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow className="hover:bg-transparent border-border/50">
+            <TableHead className="font-bold text-foreground w-[120px]">Acciones</TableHead>
             <TableHead className="font-bold text-foreground">Nombre</TableHead>
             <TableHead className="font-bold text-foreground">Apellido</TableHead>
             <TableHead className="font-bold text-foreground">Email</TableHead>
             <TableHead className="font-bold text-foreground">Rol</TableHead>
             <TableHead className="font-bold text-foreground">Creación</TableHead>
-            <TableHead className="text-right font-bold text-foreground">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -47,6 +47,23 @@ export function UsersTable({ users, onDelete }: UsersTableProps) {
           ) : (
             users.map((user) => (
               <TableRow key={user.id} className="hover:bg-foreground/[0.02] border-border/40 transition-colors">
+                <TableCell className="text-left">
+                  <div className="flex justify-start gap-2">
+                    <Link href={`/dashboard/users/${user.id}`}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-foreground hover:text-background transition-all">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all"
+                      onClick={() => onDelete(user.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
                 <TableCell className="font-semibold">{user.first_name || '-'}</TableCell>
                 <TableCell>{user.last_name || '-'}</TableCell>
                 <TableCell className="text-muted-foreground">{user.email}</TableCell>
@@ -54,8 +71,8 @@ export function UsersTable({ users, onDelete }: UsersTableProps) {
                   <Badge
                     variant="default"
                     className={`text-xs font-medium border ${user.role === 'admin'
-                        ? 'bg-blue-100 text-blue-800 border-blue-200'
-                        : 'bg-green-100 text-green-800 border-green-200'
+                      ? 'bg-blue-100 text-blue-800 border-blue-200'
+                      : 'bg-green-100 text-green-800 border-green-200'
                       } hover:bg-transparent cursor-default capitalize`}
                   >
                     {user.role}
@@ -71,23 +88,6 @@ export function UsersTable({ users, onDelete }: UsersTableProps) {
                   ) : (
                     'N/A'
                   )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Link href={`/dashboard/users/${user.id}`}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-foreground hover:text-background transition-all">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all"
-                      onClick={() => onDelete(user.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
                 </TableCell>
               </TableRow>
             ))

@@ -129,33 +129,22 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                <TableHead className="font-semibold w-[120px]">Pedido</TableHead><TableHead className="font-semibold">Cliente</TableHead><TableHead className="font-semibold">Producto</TableHead><TableHead className="font-semibold">Solicitante</TableHead><TableHead className="font-semibold w-[120px]">Estado</TableHead><TableHead className="font-semibold">Fecha</TableHead><TableHead className="font-semibold text-center w-[50px]">Archivos</TableHead><TableHead className="text-right font-semibold">Acciones</TableHead>
+                                <TableHead className="text-left font-semibold w-[140px] pl-4">Acciones</TableHead>
+                                <TableHead className="font-semibold w-[120px]">Pedido</TableHead>
+                                <TableHead className="font-semibold">Cliente</TableHead>
+                                <TableHead className="font-semibold">Producto</TableHead>
+                                <TableHead className="font-semibold">Solicitante</TableHead>
+                                <TableHead className="font-semibold w-[120px]">Estado</TableHead>
+                                <TableHead className="font-semibold">Fecha</TableHead>
+                                <TableHead className="font-semibold text-center w-[50px]">Archivos</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {currentOrders.length > 0 ? (
                                 currentOrders.map((order) => (
                                     <TableRow key={order.id} className="hover:bg-muted/30 transition-colors">
-                                        <TableCell className="font-medium text-foreground/90">{order.order_number}</TableCell>
-                                        <TableCell className="text-muted-foreground">{order.clients.name}</TableCell>
-                                        <TableCell className="text-muted-foreground">{order.products.name}</TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                            {order.solicitant.first_name} {order.solicitant.last_name}
-                                        </TableCell>
-                                        <TableCell>{getStatusBadge(order.status)}</TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                            {format(new Date(order.created_at || new Date()), 'dd/MMM/yyyy')}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {/* CELDA DE ARCHIVOS */}
-                                            <AttachmentsViewer
-                                                attachments={order.order_attachments}
-                                                orderNumber={order.order_number}
-                                            />
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                {/* FIN CELDA DE ARCHIVOS */}
+                                        <TableCell className="text-left pl-4">
+                                            <div className="flex justify-start gap-2">
                                                 {/* 1. Botón para Crear Venta */}
                                                 <Link href={`/dashboard/sales/new?orderId=${order.id}`} title="Crear Venta a partir de este Pedido">
                                                     <Button
@@ -184,6 +173,23 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
                                                     orderNumber={order.order_number}
                                                 />
                                             </div>
+                                        </TableCell>
+                                        <TableCell className="font-medium text-foreground/90">{order.order_number}</TableCell>
+                                        <TableCell className="text-muted-foreground">{order.clients.name}</TableCell>
+                                        <TableCell className="text-muted-foreground">{order.products.name}</TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {order.solicitant.first_name} {order.solicitant.last_name}
+                                        </TableCell>
+                                        <TableCell>{getStatusBadge(order.status)}</TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {format(new Date(order.created_at || new Date()), 'dd/MMM/yyyy')}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {/* CELDA DE ARCHIVOS */}
+                                            <AttachmentsViewer
+                                                attachments={order.order_attachments}
+                                                orderNumber={order.order_number}
+                                            />
                                         </TableCell>
                                     </TableRow>
                                 ))

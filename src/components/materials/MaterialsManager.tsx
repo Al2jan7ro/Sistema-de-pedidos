@@ -441,6 +441,7 @@ export function MaterialsManager() {
                             <TableHeader>
                                 <TableRow className="bg-muted/50 hover:bg-muted/50 border-b-2">
                                     <TableHead className="w-12"></TableHead>
+                                    <TableHead className="text-left font-bold w-[140px] pl-4">ACCIONES</TableHead>
                                     {columns.map((col) => (
                                         <TableHead key={col} className="font-bold text-foreground text-xs uppercase tracking-wider py-4 whitespace-nowrap min-w-[160px]">
                                             <div className="flex items-center justify-between gap-2 px-1">
@@ -477,7 +478,6 @@ export function MaterialsManager() {
                                             </div>
                                         </TableHead>
                                     ))}
-                                    <TableHead className="text-right font-bold w-[120px] pr-6">ACCIONES</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -503,25 +503,8 @@ export function MaterialsManager() {
                                             <TableCell className="text-center group">
                                                 <GripVertical className="h-5 w-5 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
                                             </TableCell>
-                                            {columns.map((col) => (
-                                                <TableCell key={col} className="py-2">
-                                                    {editingId === material.id ? (
-                                                        <Input
-                                                            type="number"
-                                                            step="0.001"
-                                                            value={material[col] ?? 0}
-                                                            onChange={(e) => handleEditMaterial(material.id, col, e.target.value)}
-                                                            className="h-9 w-full min-w-[110px] bg-background border-foreground/20 focus:border-foreground transition-all"
-                                                        />
-                                                    ) : (
-                                                        <div className="px-3 py-1 bg-muted/40 rounded text-sm text-foreground/80 font-medium border border-transparent hover:border-border transition-all">
-                                                            {material[col]}
-                                                        </div>
-                                                    )}
-                                                </TableCell>
-                                            ))}
-                                            <TableCell className="text-right pr-6">
-                                                <div className="flex justify-end gap-1">
+                                            <TableCell className="text-left pl-4">
+                                                <div className="flex justify-start gap-1">
                                                     {editingId === material.id ? (
                                                         <>
                                                             <Button
@@ -563,6 +546,23 @@ export function MaterialsManager() {
                                                     )}
                                                 </div>
                                             </TableCell>
+                                            {columns.map((col) => (
+                                                <TableCell key={col} className="py-2">
+                                                    {editingId === material.id ? (
+                                                        <Input
+                                                            type="number"
+                                                            step="0.001"
+                                                            value={material[col] ?? 0}
+                                                            onChange={(e) => handleEditMaterial(material.id, col, e.target.value)}
+                                                            className="h-9 w-full min-w-[110px] bg-background border-foreground/20 focus:border-foreground transition-all"
+                                                        />
+                                                    ) : (
+                                                        <div className="px-3 py-1 bg-muted/40 rounded text-sm text-foreground/80 font-medium border border-transparent hover:border-border transition-all">
+                                                            {material[col]}
+                                                        </div>
+                                                    )}
+                                                </TableCell>
+                                            ))}
                                         </TableRow>
                                     ))
                                 ) : (
