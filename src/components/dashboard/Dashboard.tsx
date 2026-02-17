@@ -27,9 +27,9 @@ export function Dashboard({ data }: DashboardProps) {
     const { metrics, monthlySales, weeklyOrders, statusDistribution } = data;
 
     return (
-        <div className="w-full space-y-6 p-6">
+        <div className="w-full space-y-6">
             {/* Header */}
-            <div className="flex items-center gap-3 pb-2">
+            <div className="flex items-center gap-3">
                 <Image src="/assets/gaviotylogo.png" alt="Logo" width={120} height={120} />
 
                 <div>

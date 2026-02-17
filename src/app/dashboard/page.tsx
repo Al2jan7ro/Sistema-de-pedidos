@@ -5,7 +5,7 @@ export default async function DashboardPage() {
     const data = await fetchDashboardData()
 
     return (
-        <div className="overflow-hidden">
+        <div className="w-full space-y-6">
             <Dashboard data={data} />
         </div>
     )

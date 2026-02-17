@@ -7,7 +7,8 @@ export const metadata = {
 
 export default function MaterialsPage() {
     return (
-
-        <MaterialsManager />
+        <div className="w-full space-y-6">
+            <MaterialsManager />
+        </div>
     );
 }

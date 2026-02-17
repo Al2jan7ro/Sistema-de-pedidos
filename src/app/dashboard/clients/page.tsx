@@ -32,7 +32,7 @@ export default async function ClientsPage() {
 
     // 3. Renderizar el componente de tabla (Client Component) y pasarle los datos
     return (
-        <div className="">
+        <div className="w-full space-y-6">
             <ClientTable initialClients={initialClients} />
         </div>
     );

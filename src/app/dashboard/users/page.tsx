@@ -37,9 +37,7 @@ export default async function UsersPage() {
   };
 
   return (
-
-
-    <div className="max-w-7xl mx-auto space-y-6 pt-2">
+    <div className="w-full space-y-6">
       <Card className="w-full border-border shadow-xl bg-card/50 backdrop-blur-sm">
         <CardHeader className="space-y-4 pb-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

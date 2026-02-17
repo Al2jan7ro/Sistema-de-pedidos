@@ -44,8 +44,8 @@ export default async function OrdersPage() {
     const initialOrders = await fetchOrders();
 
     return (
-        <>
+        <div className="w-full space-y-6">
             <OrderTable initialOrders={initialOrders} />
-        </>
+        </div>
     );
 }
